@@ -776,6 +776,7 @@ public class KlingonContentDatabase {
     // a query which is a prefix of the definition), nothing can precede
     // the query; otherwise, it must be preceded by a space (it begins a word),
     // except in Chinese.
+    // http://sqlfiddle.com/#!9/73382d0/4
     String nonPrefixPrecedingWildCard = (otherLang == "zh-HK") ? "%" : "% ";
     String precedingWildcard = isPrefix ? "" : nonPrefixPrecedingWildCard;
 
