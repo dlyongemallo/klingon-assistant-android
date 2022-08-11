@@ -92,7 +92,12 @@ public class EntryActivity extends BaseActivity
     clearTTS();
     mTts = initTTS();
 
+    try {
     setDrawerContentView(R.layout.entry_swipe);
+    } catch(Exception e) {
+      Log.e(TAG, "onCreate", e);
+      throw e;
+    }
 
     Uri inputUri = getIntent().getData();
     // Log.d(TAG, "EntryActivity - inputUri: " + inputUri.toString());
