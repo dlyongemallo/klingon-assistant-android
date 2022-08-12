@@ -32,6 +32,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
+import android.view.Gravity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -51,7 +52,6 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import com.google.android.material.navigation.NavigationView;
@@ -540,7 +540,7 @@ public class BaseActivity extends AppCompatActivity
     }
 
     if (mDrawer != null) {
-      mDrawer.closeDrawer(GravityCompat.START);
+      mDrawer.closeDrawer(Gravity.START);
     }
     return true;
   }
@@ -820,8 +820,8 @@ public class BaseActivity extends AppCompatActivity
   // Collapse slide-out menu if "Back" key is pressed and it's open.
   @Override
   public void onBackPressed() {
-    if (mDrawer != null && mDrawer.isDrawerOpen(GravityCompat.START)) {
-      mDrawer.closeDrawer(GravityCompat.START);
+    if (mDrawer != null && mDrawer.isDrawerOpen(Gravity.START)) {
+      mDrawer.closeDrawer(Gravity.START);
     } else {
       super.onBackPressed();
     }
