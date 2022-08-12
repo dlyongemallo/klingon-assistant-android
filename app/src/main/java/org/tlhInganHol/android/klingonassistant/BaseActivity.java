@@ -397,9 +397,11 @@ public class BaseActivity extends AppCompatActivity
 
   // Set the content view for the menu drawer.
   protected void setDrawerContentView(int layoutResId) {
+    // TODO: Fix this!!!
+    // https://stackoverflow.com/questions/59898240/the-style-on-this-component-requires-your-app-theme-to-be-theme-materialcomponen
     ConstraintLayout constraintLayout = (ConstraintLayout) findViewById(R.id.drawer_content);
     constraintLayout.removeAllViews();
-    LayoutInflater.from(getBaseContext()).inflate(layoutResId, constraintLayout, true);
+    LayoutInflater.from(BaseActivity.this).inflate(layoutResId, constraintLayout, true);
   }
 
   @SuppressWarnings("StatementWithEmptyBody")
