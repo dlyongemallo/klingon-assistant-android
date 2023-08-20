@@ -17,6 +17,7 @@
 package org.tlhInganHol.android.klingonassistant;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.SearchManager;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
@@ -31,6 +32,7 @@ import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
@@ -694,12 +696,17 @@ public class BaseActivity extends AppCompatActivity
             }
           });
 
+  @TargetApi(Build.VERSION_CODES.S)
   protected void requestPermissionForKwotdServiceJob(boolean isOneOffJob) {
     // Starting in API 33, it is necessary to request the POST_NOTIFICATIONS permission to display
     // the KWOTD notification.
 
-    if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.POST_NOTIFICATIONS)
-        == PackageManager.PERMISSION_GRANTED) {
+    boolean havePermission =
+        (Build.VERSION.SDK_INT < Build.VERSION_CODES.S)
+            || (ContextCompat.checkSelfPermission(
+                    getBaseContext(), Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED);
+    if (havePermission) {
       runKwotdServiceJob(isOneOffJob);
     } else if (isOneOffJob) {
       oneOffJobPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
