@@ -12,8 +12,8 @@ android {
         minSdkVersion 23
         // Can't increase to 33 because notification permission changes will disable KWOTD.
         targetSdkVersion 32
-        versionCode 569
-        versionName "2022.08.12a"
+        versionCode 570
+        versionName "2022.08.18a"
     }
     buildTypes {
         release {
