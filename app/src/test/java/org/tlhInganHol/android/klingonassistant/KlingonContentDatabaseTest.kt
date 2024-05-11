@@ -13,28 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tlhInganHol.android.klingonassistant
 
-package org.tlhInganHol.android.klingonassistant;
-
-import org.junit.Test;
-
-import android.content.Context;
-import android.database.Cursor;
-
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import org.junit.Test
 /**
  * Unit tests for KlingonContentDatabase logic.
  */
-public class KlingonContentDatabaseTest {
-
+class KlingonContentDatabaseTest {
     @Test
-    public void klingonContentDatabase_overrideXifanHol() throws Exception {
-        KlingonContentDatabase database = new KlingonContentDatabase(null);
-        Cursor result = database.getEntryMatches("+xifan hol");
-        assertEquals(result.getCount(), 0);
+    @Throws(java.lang.Exception::class)
+    fun klingonContentDatabase_overrideXifanHol() {
+        val database = KlingonContentDatabase(null)
+        val result = database.getEntryMatches("+xifan hol")
+        assertEquals(result!!.count, 0)
     }
-
 }
