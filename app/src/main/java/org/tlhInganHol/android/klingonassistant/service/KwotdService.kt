@@ -235,10 +235,8 @@ class KwotdService : JobService() {
 
                         entry = KlingonContentProvider.Entry(query, eword, this@KwotdService)
                     }
-                    formattedEntryName = entry.getFormattedEntryName( /* html */true)
-                    val formattedEntryName: String = formattedEntryName
-                    formattedDefinition = entry.getFormattedDefinition( /* html */true)
-                    val formattedDefinition: String = formattedDefinition
+                    val formattedEntryName: String = entry.getFormattedEntryName( /* html */true)
+                    val formattedDefinition: String = entry.getFormattedDefinition( /* html */true)
 
                     // Create a notification.
                     val notificationTitle =

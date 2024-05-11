@@ -105,6 +105,6 @@ abstract class AppCompatPreferenceActivity : PreferenceActivity() {
             if (mDelegate == null) {
                 mDelegate = AppCompatDelegate.create(this, null)
             }
-            return mDelegate
+            return mDelegate as AppCompatDelegate
         }
 }

@@ -288,10 +288,10 @@ class KlingonAssistant : BaseActivity() {
             KlingonContentProvider.Entry(query, baseContext)
         val qWillBeRemapped =
             (queryEntry.entryName.indexOf('q') != -1 && sharedPrefs.getBoolean(
-                Preferences.Companion.KEY_XIFAN_HOL_CHECKBOX_PREFERENCE,  /* default */false
+                Preferences.KEY_XIFAN_HOL_CHECKBOX_PREFERENCE,  /* default */false
             )
                     && sharedPrefs.getBoolean(
-                Preferences.Companion.KEY_SWAP_QS_CHECKBOX_PREFERENCE,  /* default */false
+                Preferences.KEY_SWAP_QS_CHECKBOX_PREFERENCE,  /* default */false
             ))
         var entryNameWithPoS =
             queryEntry.entryName + queryEntry.getBracketedPartOfSpeech( /* isHtml */true)
@@ -384,7 +384,7 @@ class KlingonAssistant : BaseActivity() {
         private var mCoreKlingonFontTypeface: Typeface? = null
 
         fun getKlingonFontTypeface(context: Context?): Typeface? {
-            val klingonFontCode: String = Preferences.Companion.getKlingonFontCode(context)
+            val klingonFontCode: String? = Preferences.getKlingonFontCode(context)
             if (klingonFontCode == "CORE") {
                 if (mCoreKlingonFontTypeface == null) {
                     mCoreKlingonFontTypeface =

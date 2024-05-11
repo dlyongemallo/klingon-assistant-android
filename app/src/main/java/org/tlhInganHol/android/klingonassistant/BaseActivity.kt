@@ -140,7 +140,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         appNameView.text = klingonAppName
 
         // We use the version of the built-in database as the app's version, since they're in sync.
-        val bundledVersion = KlingonContentDatabase.getBundledDatabaseVersion()
+        val bundledVersion = KlingonContentDatabase.bundledDatabaseVersion
         val installedVersion =
                 sharedPrefs.getString(
                         KlingonContentDatabase.KEY_INSTALLED_DATABASE_VERSION,  /* default */bundledVersion)
@@ -212,7 +212,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             val installedVersion =
                     sharedPrefs.getString(
                             KlingonContentDatabase.KEY_INSTALLED_DATABASE_VERSION,  /* default */
-                            KlingonContentDatabase.getBundledDatabaseVersion())
+                            KlingonContentDatabase.bundledDatabaseVersion)
             val updatedVersion =
                     sharedPrefs.getString(
                             KlingonContentDatabase.KEY_UPDATED_DATABASE_VERSION,  /* default */installedVersion)
@@ -236,7 +236,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         val locale = if (Preferences.useKlingonUI(baseContext)) {
             Locale("tlh", "CAN")
         } else {
-            KlingonAssistant.getSystemLocale()
+            KlingonAssistant.systemLocale
         }
         val configuration = baseContext.resources.configuration
         configuration.locale = locale
@@ -332,7 +332,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             val editLang =
                     sharedPrefs.getString(
                             Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                            Preferences.getSystemPreferredLanguage())
+                            Preferences.systemPreferredLanguage)
             // Display menu item to list autotranslated definitions. (Do this even
             // for German, Portuguese, and Finnish, as a database update might mean
             // there are new autotranslations.)

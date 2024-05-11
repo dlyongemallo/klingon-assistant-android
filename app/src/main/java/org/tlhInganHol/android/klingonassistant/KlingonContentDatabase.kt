@@ -320,7 +320,7 @@ class KlingonContentDatabase(context: Context?) {
             val otherLang =
                 sharedPrefs.getString(
                     Preferences.Companion.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                    Preferences.Companion.getSystemPreferredLanguage()
+                    Preferences.Companion.systemPreferredLanguage
                 )
             val englishNonPrefixMinLength = 3
             val otherLanguageNonPrefixMinLength = if (otherLang == "zh-HK") 1 else 3
@@ -407,7 +407,7 @@ class KlingonContentDatabase(context: Context?) {
         var currentPrefixEntry: KlingonContentProvider.Entry? = null
         var verbSuffixLevel = 0
         for (componentEntry in analysisComponents!!) {
-            val componentEntryName = componentEntry.getEntryName()
+            val componentEntryName = componentEntry?.entryName
             val isNoun = componentEntry!!.isNoun
             val isVerb = componentEntry.isVerb
             val isPrefix = componentEntry.isPrefix
@@ -594,7 +594,7 @@ class KlingonContentDatabase(context: Context?) {
         val otherLang =
             sharedPrefs.getString(
                 Preferences.Companion.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                Preferences.Companion.getSystemPreferredLanguage()
+                Preferences.Companion.systemPreferredLanguage
             )
         var key =
             if (useSearchTags

@@ -47,17 +47,17 @@ class EntryFragment : Fragment() {
     ): View? {
         val rootView = inflater.inflate(R.layout.entry, container, false) as ViewGroup
 
-        val resources = activity!!.resources
+        val resources = requireActivity().resources
 
         val entryTitle = rootView.findViewById<View>(R.id.entry_title) as TextView
         val entryBody = rootView.findViewById<View>(R.id.entry_body) as TextView
 
-        val uri = Uri.parse(arguments!!.getString("uri"))
+        val uri = Uri.parse(requireArguments().getString("uri"))
 
         // Retrieve the entry's data.
         // Note: managedQuery is deprecated since API 11.
         val cursor =
-            activity!!.managedQuery(
+            requireActivity().managedQuery(
                 uri,
                 KlingonContentDatabase.Companion.ALL_KEYS,
                 null,
@@ -65,7 +65,7 @@ class EntryFragment : Fragment() {
                 null
             )
         val entry =
-            KlingonContentProvider.Entry(cursor, activity!!.baseContext)
+            KlingonContentProvider.Entry(cursor, requireActivity().baseContext)
         val entryId = entry.id
 
         // Handle alternative spellings here.
@@ -75,15 +75,15 @@ class EntryFragment : Fragment() {
 
         // Get the shared preferences.
         val sharedPrefs =
-            PreferenceManager.getDefaultSharedPreferences(activity!!.baseContext)
+            PreferenceManager.getDefaultSharedPreferences(requireActivity().baseContext)
 
         // Set the entry's name (along with info like "slang", formatted in HTML).
         entryTitle.invalidate()
         val useKlingonFont: Boolean = Preferences.Companion.useKlingonFont(
-            activity!!.baseContext
+            requireActivity().baseContext
         )
-        val klingonTypeface: Typeface =
-            KlingonAssistant.Companion.getKlingonFontTypeface(activity!!.baseContext)
+        val klingonTypeface: Typeface? =
+            KlingonAssistant.getKlingonFontTypeface(requireActivity().baseContext)
         if (useKlingonFont) {
             // Preference is set to display this in {pIqaD}!
             entryTitle.text = entry.formattedEntryNameInKlingonFont
@@ -447,10 +447,10 @@ class EntryFragment : Fragment() {
     ) {
         val smallTextScale = 0.8.toFloat()
         val useKlingonFont: Boolean = Preferences.Companion.useKlingonFont(
-            activity!!.baseContext
+            requireActivity().baseContext
         )
-        val klingonTypeface: Typeface =
-            KlingonAssistant.Companion.getKlingonFontTypeface(activity!!.baseContext)
+        val klingonTypeface: Typeface? =
+            KlingonAssistant.getKlingonFontTypeface(requireActivity().baseContext)
 
         var mixedText = ssb.toString()
         var m: Matcher = KlingonContentProvider.Entry.Companion.ENTRY_PATTERN.matcher(mixedText)
@@ -462,7 +462,7 @@ class EntryFragment : Fragment() {
 
             // Process the linked entry information.
             val linkedEntry =
-                KlingonContentProvider.Entry(query, activity!!.baseContext)
+                KlingonContentProvider.Entry(query, requireActivity().baseContext)
 
             // Log.d(TAG, "linkedEntry.getEntryName() = " + linkedEntry.getEntryName());
 
@@ -490,11 +490,11 @@ class EntryFragment : Fragment() {
             val disableEntryLink =
                 ((entry == null)
                         || linkedEntry.doNotLink()
-                        || linkedEntry.isSource
+                        || linkedEntry.isSource()
                         || linkedEntry.isURL)
             // The last span set on a range must have FINAL_FLAGS.
             val maybeFinalFlags = if (disableEntryLink) FINAL_FLAGS else INTERMEDIATE_FLAGS
-            if (linkedEntry.isSource) {
+            if (linkedEntry.isSource()) {
                 // If possible, link to the source.
                 val url = linkedEntry.url
                 if (url != "") {
@@ -520,14 +520,14 @@ class EntryFragment : Fragment() {
                     klingonEntryName = linkedEntry.entryNameInKlingonFont
                     replaceWithKlingonFontText = true
                 } else if (Preferences.Companion.useKlingonUI(
-                        activity!!.baseContext
+                        requireActivity().baseContext
                     )
                 ) {
                     // This is a category, and the option to use Klingon UI is set, so this will be in
                     // Klingon.
                     // Display it in Klingon font.
                     klingonEntryName =
-                        KlingonContentProvider.Companion.convertStringToKlingonFont(entry.getSentenceType())
+                        KlingonContentProvider.convertStringToKlingonFont(entry?.sentenceType)
                     replaceWithKlingonFontText = true
                 } else {
                     // This is a category, but the option to use Klingon UI is not set, so this will be in the

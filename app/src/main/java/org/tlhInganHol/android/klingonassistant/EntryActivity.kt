@@ -472,7 +472,7 @@ class EntryActivity // TTS:
         val editLang =
             sharedPrefs.getString(
                 Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                Preferences.getSystemPreferredLanguage()
+                Preferences.systemPreferredLanguage
             )
         val showUnsupportedFeatures =
             sharedPrefs.getBoolean(

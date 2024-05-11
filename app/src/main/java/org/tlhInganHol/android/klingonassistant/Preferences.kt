@@ -132,8 +132,8 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
                 PreferenceManager.getDefaultSharedPreferences(baseContext)
             val installedVersion =
                 sharedPrefs.getString(
-                    KlingonContentDatabase.Companion.KEY_INSTALLED_DATABASE_VERSION,  /* default */
-                    KlingonContentDatabase.Companion.getBundledDatabaseVersion()
+                    KlingonContentDatabase.KEY_INSTALLED_DATABASE_VERSION,  /* default */
+                    KlingonContentDatabase.bundledDatabaseVersion
                 )
             launchExternal(
                 "https://github.com/De7vID/klingon-assistant-data/commits/master@{"
@@ -148,7 +148,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
             OnPreferenceClickListener { // The bundled database version is the app's built date.
                 launchExternal(
                     "https://github.com/De7vID/klingon-assistant-android/commits/master@{"
-                            + KlingonContentDatabase.Companion.getBundledDatabaseVersion()
+                            + KlingonContentDatabase.bundledDatabaseVersion
                             + "}"
                 )
                 true
@@ -157,7 +157,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
 
     private fun restoreLocaleConfiguration() {
         // Always restore system (non-Klingon) locale here.
-        val locale: Locale = KlingonAssistant.Companion.getSystemLocale()
+        val locale: Locale = KlingonAssistant.systemLocale
         val configuration = baseContext.resources.configuration
         configuration.locale = locale
         baseContext
@@ -273,7 +273,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         val systemPreferredLanguage: String
             // Detect if the system language is a supported language.
             get() {
-                val language: String = KlingonAssistant.Companion.getSystemLocale().getLanguage()
+                val language: String = KlingonAssistant.systemLocale.language
                 if (language === Locale.GERMAN.language) {
                     return "de"
                 } else if (language === Locale("fa").language) {

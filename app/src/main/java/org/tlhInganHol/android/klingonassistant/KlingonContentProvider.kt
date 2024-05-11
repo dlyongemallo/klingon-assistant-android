@@ -1086,7 +1086,7 @@ class KlingonContentProvider : ContentProvider() {
             val otherLang =
                 sharedPrefs.getString(
                     Preferences.Companion.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                    Preferences.Companion.getSystemPreferredLanguage()
+                    Preferences.Companion.systemPreferredLanguage
                 )
             if (otherLang !== "NONE") {
                 // Show other-language definitions preference set to a language and that other-language
@@ -1108,7 +1108,7 @@ class KlingonContentProvider : ContentProvider() {
             val otherLang =
                 sharedPrefs.getString(
                     Preferences.Companion.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                    Preferences.Companion.getSystemPreferredLanguage()
+                    Preferences.Companion.systemPreferredLanguage
                 )
             if (otherLang !== "NONE") {
                 // Show other-language definitions preference set to a language and that other-language
@@ -1127,7 +1127,7 @@ class KlingonContentProvider : ContentProvider() {
             val otherLang =
                 sharedPrefs.getString(
                     Preferences.Companion.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE,  /* default */
-                    Preferences.Companion.getSystemPreferredLanguage()
+                    Preferences.Companion.systemPreferredLanguage
                 )
             if (otherLang !== "NONE") {
                 // Show other-language definitions preference set to a language and that other-language
