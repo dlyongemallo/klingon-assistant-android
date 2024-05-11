@@ -13,42 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tlhInganHol.android.klingonassistant
 
-package org.tlhInganHol.android.klingonassistant;
+import android.os.Bundle
+import android.preference.PreferenceManager
+import android.view.View
+import android.widget.TextView
 
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.widget.TextView;
+/** Displays the sources page.  */
+class SourcesActivity : BaseActivity() {
+    // private static final String TAG = "SourcesActivity";
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setDrawerContentView(R.layout.sources)
+        val resources = resources
+        val entryTitle = findViewById<View>(R.id.entry_title) as TextView
 
-/** Displays the sources page. */
-public class SourcesActivity extends BaseActivity {
-  // private static final String TAG = "SourcesActivity";
+        // Get the shared preferences.
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setDrawerContentView(R.layout.sources);
-    Resources resources = getResources();
-    TextView entryTitle = (TextView) findViewById(R.id.entry_title);
+        // Set the title.
+        entryTitle.invalidate()
+        if (Preferences.Companion.useKlingonUI(baseContext)
+            && Preferences.Companion.useKlingonFont(
+                baseContext
+            )
+        ) {
+            // Klingon (in {pIqaD}).
+            entryTitle.setTypeface(KlingonAssistant.Companion.getKlingonFontTypeface(baseContext))
+            entryTitle.setText(
+                KlingonContentProvider.Companion.convertStringToKlingonFont(
+                    resources.getString(R.string.menu_sources)
+                )
+            )
+        } else {
+            entryTitle.text = resources.getString(R.string.menu_sources)
+        }
 
-    // Get the shared preferences.
-    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-
-    // Set the title.
-    entryTitle.invalidate();
-    if (Preferences.useKlingonUI(getBaseContext())
-        && Preferences.useKlingonFont(getBaseContext())) {
-      // Klingon (in {pIqaD}).
-      entryTitle.setTypeface(KlingonAssistant.getKlingonFontTypeface(getBaseContext()));
-      entryTitle.setText(
-          KlingonContentProvider.convertStringToKlingonFont(
-              resources.getString(R.string.menu_sources)));
-    } else {
-      entryTitle.setText(resources.getString(R.string.menu_sources));
+        // TODO: Bold the names of sources.
     }
-
-    // TODO: Bold the names of sources.
-  }
 }

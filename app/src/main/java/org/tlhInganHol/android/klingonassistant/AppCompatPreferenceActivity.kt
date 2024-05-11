@@ -13,114 +13,98 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tlhInganHol.android.klingonassistant
 
-package org.tlhInganHol.android.klingonassistant;
-
-import android.content.res.Configuration;
-import android.os.Bundle;
-import android.preference.PreferenceActivity;
-import android.view.MenuInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.LayoutRes;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.Toolbar;
+import android.content.res.Configuration
+import android.os.Bundle
+import android.preference.PreferenceActivity
+import android.view.MenuInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.LayoutRes
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.Toolbar
 
 /**
- * A {@link android.preference.PreferenceActivity} which implements and proxies the necessary calls
+ * A [android.preference.PreferenceActivity] which implements and proxies the necessary calls
  * to be used with AppCompat.
  */
-public abstract class AppCompatPreferenceActivity extends PreferenceActivity {
+abstract class AppCompatPreferenceActivity : PreferenceActivity() {
+    private var mDelegate: AppCompatDelegate? = null
 
-  private AppCompatDelegate mDelegate;
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    getDelegate().installViewFactory();
-    getDelegate().onCreate(savedInstanceState);
-    super.onCreate(savedInstanceState);
-  }
-
-  @Override
-  protected void onPostCreate(Bundle savedInstanceState) {
-    super.onPostCreate(savedInstanceState);
-    getDelegate().onPostCreate(savedInstanceState);
-  }
-
-  public ActionBar getSupportActionBar() {
-    return getDelegate().getSupportActionBar();
-  }
-
-  public void setSupportActionBar(@Nullable Toolbar toolbar) {
-    getDelegate().setSupportActionBar(toolbar);
-  }
-
-  @Override
-  public MenuInflater getMenuInflater() {
-    return getDelegate().getMenuInflater();
-  }
-
-  @Override
-  public void setContentView(@LayoutRes int layoutResID) {
-    getDelegate().setContentView(layoutResID);
-  }
-
-  @Override
-  public void setContentView(View view) {
-    getDelegate().setContentView(view);
-  }
-
-  @Override
-  public void setContentView(View view, ViewGroup.LayoutParams params) {
-    getDelegate().setContentView(view, params);
-  }
-
-  @Override
-  public void addContentView(View view, ViewGroup.LayoutParams params) {
-    getDelegate().addContentView(view, params);
-  }
-
-  @Override
-  protected void onPostResume() {
-    super.onPostResume();
-    getDelegate().onPostResume();
-  }
-
-  @Override
-  protected void onTitleChanged(CharSequence title, int color) {
-    super.onTitleChanged(title, color);
-    getDelegate().setTitle(title);
-  }
-
-  @Override
-  public void onConfigurationChanged(Configuration newConfig) {
-    super.onConfigurationChanged(newConfig);
-    getDelegate().onConfigurationChanged(newConfig);
-  }
-
-  @Override
-  protected void onStop() {
-    super.onStop();
-    getDelegate().onStop();
-  }
-
-  @Override
-  protected void onDestroy() {
-    super.onDestroy();
-    getDelegate().onDestroy();
-  }
-
-  public void invalidateOptionsMenu() {
-    getDelegate().invalidateOptionsMenu();
-  }
-
-  private AppCompatDelegate getDelegate() {
-    if (mDelegate == null) {
-      mDelegate = AppCompatDelegate.create(this, null);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        delegate.installViewFactory()
+        delegate.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
     }
-    return mDelegate;
-  }
+
+    override fun onPostCreate(savedInstanceState: Bundle?) {
+        super.onPostCreate(savedInstanceState)
+        delegate.onPostCreate(savedInstanceState)
+    }
+
+    val supportActionBar: ActionBar?
+        get() = delegate.supportActionBar
+
+    fun setSupportActionBar(toolbar: Toolbar?) {
+        delegate.setSupportActionBar(toolbar)
+    }
+
+    override fun getMenuInflater(): MenuInflater {
+        return delegate.menuInflater
+    }
+
+    override fun setContentView(@LayoutRes layoutResID: Int) {
+        delegate.setContentView(layoutResID)
+    }
+
+    override fun setContentView(view: View) {
+        delegate.setContentView(view)
+    }
+
+    override fun setContentView(view: View, params: ViewGroup.LayoutParams) {
+        delegate.setContentView(view, params)
+    }
+
+    override fun addContentView(view: View, params: ViewGroup.LayoutParams) {
+        delegate.addContentView(view, params)
+    }
+
+    override fun onPostResume() {
+        super.onPostResume()
+        delegate.onPostResume()
+    }
+
+    override fun onTitleChanged(title: CharSequence, color: Int) {
+        super.onTitleChanged(title, color)
+        delegate.setTitle(title)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        delegate.onConfigurationChanged(newConfig)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        delegate.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        delegate.onDestroy()
+    }
+
+    override fun invalidateOptionsMenu() {
+        delegate.invalidateOptionsMenu()
+    }
+
+    private val delegate: AppCompatDelegate
+        get() {
+            if (mDelegate == null) {
+                mDelegate = AppCompatDelegate.create(this, null)
+            }
+            return mDelegate
+        }
 }

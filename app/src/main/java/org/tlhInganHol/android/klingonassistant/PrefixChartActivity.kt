@@ -13,40 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.tlhInganHol.android.klingonassistant
 
-package org.tlhInganHol.android.klingonassistant;
+import android.os.Bundle
+import android.preference.PreferenceManager
+import android.view.View
+import android.widget.TextView
 
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.widget.TextView;
+/** Displays the prefix chart.  */
+class PrefixChartActivity : BaseActivity() {
+    // private static final String TAG = "PrefixChartActivity";
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
 
-/** Displays the prefix chart. */
-public class PrefixChartActivity extends BaseActivity {
-  // private static final String TAG = "PrefixChartActivity";
+        setDrawerContentView(R.layout.prefix_chart)
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        val resources = resources
+        val entryTitle = findViewById<View>(R.id.entry_title) as TextView
 
-    setDrawerContentView(R.layout.prefix_chart);
-
-    Resources resources = getResources();
-    TextView entryTitle = (TextView) findViewById(R.id.entry_title);
-
-    // Set the title.
-    entryTitle.invalidate();
-    if (Preferences.useKlingonUI(getBaseContext())
-        && Preferences.useKlingonFont(getBaseContext())) {
-      // Klingon (in {pIqaD}).
-      entryTitle.setTypeface(KlingonAssistant.getKlingonFontTypeface(getBaseContext()));
-      entryTitle.setText(
-          KlingonContentProvider.convertStringToKlingonFont(
-              resources.getString(R.string.menu_prefix_chart)));
-    } else {
-      entryTitle.setText(resources.getString(R.string.menu_prefix_chart));
+        // Set the title.
+        entryTitle.invalidate()
+        if (Preferences.Companion.useKlingonUI(baseContext)
+            && Preferences.Companion.useKlingonFont(
+                baseContext
+            )
+        ) {
+            // Klingon (in {pIqaD}).
+            entryTitle.setTypeface(KlingonAssistant.Companion.getKlingonFontTypeface(baseContext))
+            entryTitle.setText(
+                KlingonContentProvider.Companion.convertStringToKlingonFont(
+                    resources.getString(R.string.menu_prefix_chart)
+                )
+            )
+        } else {
+            entryTitle.text = resources.getString(R.string.menu_prefix_chart)
+        }
     }
-  }
 }
