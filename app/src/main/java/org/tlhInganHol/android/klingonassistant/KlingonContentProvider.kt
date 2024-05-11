@@ -816,7 +816,7 @@ class KlingonContentProvider : ContentProvider() {
             get() {
                 val entryName = entryNameInKlingonFont
                 var ssb = SpannableStringBuilder(entryName)
-                val klingonTypeface: Typeface =
+                val klingonTypeface: Typeface? =
                     KlingonAssistant.Companion.getKlingonFontTypeface(mContext)
                 ssb.setSpan(
                     KlingonTypefaceSpan("", klingonTypeface),

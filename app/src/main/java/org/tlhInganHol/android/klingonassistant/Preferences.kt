@@ -73,7 +73,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
             val klingonTitle: String =
                 KlingonContentProvider.Companion.convertStringToKlingonFont(title)
             ssb = SpannableString(klingonTitle)
-            val klingonTypeface: Typeface = KlingonAssistant.Companion.getKlingonFontTypeface(
+            val klingonTypeface: Typeface? = KlingonAssistant.getKlingonFontTypeface(
                 baseContext
             )
             ssb.setSpan(

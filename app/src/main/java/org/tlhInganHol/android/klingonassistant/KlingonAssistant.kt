@@ -206,9 +206,8 @@ class KlingonAssistant : BaseActivity() {
                 else "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;")
                 else ""
 
-            val sharedPrefs =
-                PreferenceManager.getDefaultSharedPreferences(baseContext)
-            if (Preferences.Companion.useKlingonFont(
+            // val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+            if (Preferences.useKlingonFont(
                     baseContext
                 )
             ) {
@@ -287,7 +286,7 @@ class KlingonAssistant : BaseActivity() {
         val queryEntry =
             KlingonContentProvider.Entry(query, baseContext)
         val qWillBeRemapped =
-            (queryEntry.entryName.indexOf('q') != -1 && sharedPrefs.getBoolean(
+            (queryEntry.entryName!!.indexOf('q') != -1 && sharedPrefs.getBoolean(
                 Preferences.KEY_XIFAN_HOL_CHECKBOX_PREFERENCE,  /* default */false
             )
                     && sharedPrefs.getBoolean(

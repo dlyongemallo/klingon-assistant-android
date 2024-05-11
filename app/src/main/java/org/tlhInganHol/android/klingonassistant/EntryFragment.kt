@@ -467,9 +467,9 @@ class EntryFragment : Fragment() {
             // Log.d(TAG, "linkedEntry.getEntryName() = " + linkedEntry.getEntryName());
 
             // Delete the brackets and metadata parts of the string (which includes analysis components).
-            ssb.delete(m.start() + 1 + linkedEntry.entryName.length, m.end())
+            ssb.delete(m.start() + 1 + linkedEntry.entryName!!.length, m.end())
             ssb.delete(m.start(), m.start() + 1)
-            var end = m.start() + linkedEntry.entryName.length
+            var end = m.start() + linkedEntry.entryName!!.length
 
             // Insert link to the category for a useful phrase.
             if ((entry != null && entry.isSentence

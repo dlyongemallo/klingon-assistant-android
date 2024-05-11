@@ -207,7 +207,7 @@ class EntryActivity // TTS:
    */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         super.onCreateOptionsMenu(menu)
-        mShareButton = menu.findItem(R.id.action_share)
+        val mShareButton = menu.findItem(R.id.action_share)
 
         // This is also updated in onPageSelected.
         if (mShareEntryIntent != null) {
@@ -217,7 +217,7 @@ class EntryActivity // TTS:
 
         // TTS:
         // The button is disabled in the layout. It should only be enabled in EntryActivity.
-        mSpeakButton = menu.findItem(R.id.action_speak)
+        val mSpeakButton = menu.findItem(R.id.action_speak)
         // if (ttsInitialized) {
         //   // Log.d(TAG, "enabling TTS button in onCreateOptionsMenu");
         mSpeakButton.setVisible(true)
@@ -338,7 +338,7 @@ class EntryActivity // TTS:
                     Uri.parse(
                         KlingonContentProvider.CONTENT_URI.toString() + "/get_entry_by_id/" + entryIdsList[i]
                     )
-                entryFragments.add(EntryFragment.newInstance(uri))
+                (entryFragments as ArrayList<EntryFragment>).add(EntryFragment.newInstance(uri))
             }
         }
 

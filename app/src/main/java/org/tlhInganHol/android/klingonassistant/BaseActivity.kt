@@ -42,6 +42,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -588,8 +589,8 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     // Register the permissions callbacks, which handles the user's response to the systems
     // permissions dialog.
     // TODO: Combine the one-off job and scheduled job callbacks somehow.
-    private val oneOffJobPermissionLauncher = registerForActivityResult<String, Boolean>(
-            RequestPermission()
+    private val oneOffJobPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             runKwotdServiceJob( /* isOneOffJob */true)
@@ -603,8 +604,8 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                     .show()
         }
     }
-    private val scheduledJobPermissionLauncher = registerForActivityResult<String, Boolean>(
-            RequestPermission()
+    private val scheduledJobPermissionLauncher = registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
             runKwotdServiceJob( /* isOneOffJob */false)

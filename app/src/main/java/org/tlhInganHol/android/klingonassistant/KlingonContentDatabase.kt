@@ -127,7 +127,7 @@ class KlingonContentDatabase(context: Context?) {
         }
 
         // Note: The order of the replacements is important.
-        return shorthand
+        return shorthand!!
             .replace("ngH".toRegex(), "NGH") // differentiate "ngh" from "ngH"
             .replace(
                 "h".toRegex(),
@@ -225,7 +225,7 @@ class KlingonContentDatabase(context: Context?) {
         // already given to us.
         val analysisComponents =
             queryEntry.componentsAsEntries
-        if (!analysisComponents!!.isEmpty()) {
+        if (analysisComponents!!.isNotEmpty()) {
             // Add the given list of components to the results.
             addGivenComponentsToResults(analysisComponents, resultsCursor, resultsSet)
 
@@ -283,7 +283,7 @@ class KlingonContentDatabase(context: Context?) {
             // Klingon, but 2 characters allow searching from the end for
             // "rhyming" purposes.
             val klingonNonPrefixMinLength = 2
-            if (queryEntry.entryName.length >= klingonNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= klingonNonPrefixMinLength) {
                 val resultsWithGivenQueryCursor =
                     getEntriesContainingQuery(looseQuery,  /* isPrefix */false)
                 copyCursorEntries(
@@ -325,7 +325,7 @@ class KlingonContentDatabase(context: Context?) {
             val englishNonPrefixMinLength = 3
             val otherLanguageNonPrefixMinLength = if (otherLang == "zh-HK") 1 else 3
 
-            if (queryEntry.entryName.length >= englishNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= englishNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false,  /* isPrefix */
@@ -335,7 +335,7 @@ class KlingonContentDatabase(context: Context?) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= otherLanguageNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= otherLanguageNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false,  /* isPrefix */
@@ -347,7 +347,7 @@ class KlingonContentDatabase(context: Context?) {
             }
 
             // Match search tags, from beginning, then anywhere else.
-            if (queryEntry.entryName.length >= englishNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= englishNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     true,  /* isPrefix */
@@ -357,7 +357,7 @@ class KlingonContentDatabase(context: Context?) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= otherLanguageNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= otherLanguageNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     true,  /* isPrefix */
@@ -367,7 +367,7 @@ class KlingonContentDatabase(context: Context?) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= englishNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= englishNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false,  /* isPrefix */
@@ -377,7 +377,7 @@ class KlingonContentDatabase(context: Context?) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= otherLanguageNonPrefixMinLength) {
+            if (queryEntry.entryName!!.length >= otherLanguageNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false,  /* isPrefix */
