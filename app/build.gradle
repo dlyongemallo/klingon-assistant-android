@@ -46,7 +46,7 @@ android {
 // Uncommenting this line prevents buildship from clobbering the
 // app/.classpath file, which should have a "src" pointing to "src/main/java"
 // and a "lib" pointing to "$ANDROID_HOME/platforms/android-xx/android.jar".
-// eclipse.classpath.break_buildship = true
+eclipse.classpath.break_buildship = true
 
 allprojects {
     repositories {

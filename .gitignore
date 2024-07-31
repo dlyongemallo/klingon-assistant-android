@@ -18,8 +18,8 @@ local.properties
 
 # Produced by jdtls
 app/bin
-.project
-.settings/
-app/.classpath
-app/.project
-app/.settings/
+# .project
+# .settings/
+# app/.classpath
+# app/.project
+# app/.settings/
