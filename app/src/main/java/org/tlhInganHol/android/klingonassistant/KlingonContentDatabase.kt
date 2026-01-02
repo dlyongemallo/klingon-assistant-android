@@ -141,14 +141,14 @@ class KlingonContentDatabase(context: Context) {
             .replace("s", "S")
             .replace("z", "'")
             .replace("x", "tlh")
-            // At this point, "ngH" is definitely {ng} + {H}, but "ngh" might be either {n} + {gh} or
-            // {ng} + {H}. Furthermore, "ng" might be {ng} or {n} + {gh}.
+            // At this point, "ngH" is definitely {ng} + {H}, but "ngh" might be either {n} + {gh}
+            // or {ng} + {H}. Furthermore, "ng" might be {ng} or {n} + {gh}.
             // These are the possible words with {n} + {gh}: {nenghep}, {QIngheb}, {tlhonghaD}
             // These are the possible words with {ng} + {H}: {chungHa'wI'}, {mangHom}, {qengHoD},
-            // {tungHa'}, {vengHom}. Instead of checking both, cheat by hardcoding the possibilities.
-            // This means this code has to be updated whenever an entry with {ngH} or {ngh} is
-            // added to the database.
-            .replace("(chung|mang|qeng|tung|veng)h".toRegex(), "$1H")
+            // {tungHa'}, {vengHom}, {ngengHom}. Instead of checking both, cheat by hardcoding the
+            // possibilities. This means this code has to be updated whenever an entry with {ngH}
+            // or {ngh} is added to the database.
+            .replace("(chung|mang|qeng|tung|veng|ngeng)h".toRegex(), "$1H")
             .replace("Hanguq", "Hanghuq")
             .replace("nengep", "nenghep")
             .replace("QIngeb", "QIngheb")
