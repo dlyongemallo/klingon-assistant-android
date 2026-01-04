@@ -176,6 +176,120 @@ class KlingonContentProvider : ContentProvider() {
                 .replace("", "⋯")
             return klingonString
         }
+
+        fun parseComplexWord(
+            candidate: String, isNounCandidate: Boolean, complexWordsList: MutableList<ComplexWord>) {
+            val complexWord = ComplexWord(candidate, isNounCandidate)
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "\n\n* parsing = " + candidate + " (" + (if (isNounCandidate) "n" else "v") + ") *")
+            }
+            if (!isNounCandidate) {
+                // Check prefix.
+                val strippedPrefixComplexWord = complexWord.stripPrefix()
+                if (strippedPrefixComplexWord != null) {
+                    // Branch off a word with the prefix stripped.
+                    stripSuffix(strippedPrefixComplexWord, complexWordsList)
+                }
+            }
+            // Check suffixes.
+            stripSuffix(complexWord, complexWordsList)
+        }
+
+        // Helper method to strip a level of suffix from a word.
+        private fun stripSuffix(
+            initialComplexWord: ComplexWord?, complexWordsList: MutableList<ComplexWord>) {
+            if (initialComplexWord == null) return
+            var complexWord: ComplexWord? = initialComplexWord
+            if (complexWord!!.hasNoMoreSuffixes()) {
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, "attempting to add to complex words list: " + complexWord.mUnparsedPart)
+                }
+                complexWord.addSelf(complexWordsList)
+
+                if (complexWord.mIsNounCandidate) {
+                    // Attempt to get the verb root of this word if it's a noun.
+                    complexWord = complexWord.getVerbRootIfNoun()
+                } else if (complexWord.isBareWord()) {
+                    // Check for type 5 noun suffix on a possibly adjectival verb.
+                    complexWord = complexWord.getAdjectivalVerbWithType5NounSuffix()
+                    if (complexWord != null) {
+                        val adjectivalVerb = complexWord.stem()
+                        if (adjectivalVerb.endsWith("be'")
+                            || adjectivalVerb.endsWith("qu'")
+                            || adjectivalVerb.endsWith("Ha'")) {
+                            val adjectivalVerbWithoutRover =
+                                adjectivalVerb.substring(0, adjectivalVerb.length - 3)
+                            // Adjectival verbs may end with a rover (except for {-Qo'}), so check for that here.
+                            val anotherComplexWord =
+                                ComplexWord(adjectivalVerbWithoutRover, complexWord)
+                            if (adjectivalVerb.endsWith("be'")) {
+                                anotherComplexWord.mVerbTypeRNegation = 0
+                            } else if (adjectivalVerb.endsWith("qu'")) {
+                                anotherComplexWord.mVerbTypeREmphatic = 0
+                            } else if (adjectivalVerb.endsWith("Ha'")) {
+                                anotherComplexWord.mVerbSuffixes[0] = 1
+                            }
+                            stripSuffix(anotherComplexWord, complexWordsList)
+                        }
+                    }
+                } else {
+                    // We're done.
+                    complexWord = null
+                }
+
+                if (complexWord == null) {
+                    // Not a noun or the noun has no further verb root, so we're done with this complex word.
+                    return
+                }
+                // Note that at this point we continue with a newly created complex word.
+            }
+
+            if (BuildConfig.DEBUG) {
+                val suffixType: String
+                if (complexWord!!.mIsNounCandidate) {
+                    // Noun suffix level corresponds to the suffix type.
+                    suffixType = "type " + complexWord.mSuffixLevel
+                } else {
+                    // Verb suffix level doesn't correspond exactly: {-Ha'}, types 1 through 8, {-Qo'}, then 9.
+                    if (complexWord.mSuffixLevel == 1) {
+                        suffixType = "-Ha'"
+                    } else if (complexWord.mSuffixLevel == 10) {
+                        suffixType = "-Qo'"
+                    } else if (complexWord.mSuffixLevel == 11) {
+                        suffixType = "type 9"
+                    } else {
+                        suffixType = "type " + (complexWord.mSuffixLevel - 1)
+                    }
+                }
+                Log.d(
+                    TAG,
+                    "stripSuffix called on {"
+                        + complexWord.mUnparsedPart
+                        + "} for "
+                        + if (complexWord.mIsNounCandidate) "noun" else "verb"
+                        + " suffix: "
+                        + suffixType)
+            }
+
+            // Special check for the suffix {-oy} attached to a noun ending in a vowel. This needs to be
+            // done additionally to the regular check, since it may be possible to parse a word either way,
+            // e.g., {ghu'oy} could be {ghu} + {-'oy} or {ghu'} + {-oy}.
+            val apostropheOyComplexWord = complexWord.maybeStripApostropheOy()
+            if (apostropheOyComplexWord != null) {
+                // "'oy" was stripped, branch using it as a new candidate.
+                stripSuffix(apostropheOyComplexWord, complexWordsList)
+            }
+
+            // Attempt to strip one level of suffix.
+            val strippedSuffixComplexWord = complexWord.stripSuffixAndBranch()
+            if (strippedSuffixComplexWord != null) {
+                // A suffix of the current type was found, branch using it as a new candidate.
+                stripSuffix(strippedSuffixComplexWord, complexWordsList)
+            }
+            // Tail recurse to the next level of suffix. Note that the suffix level is decremented in
+            // complexWord.stripSuffixAndBranch() above.
+            stripSuffix(complexWord, complexWordsList)
+        }
     }
 
     override fun onCreate(): Boolean {
@@ -252,9 +366,9 @@ class KlingonContentProvider : ContentProvider() {
         // Format the search results for display here. These are the two-line dropdown results from the
         // search box. We fully indent suffixes, but only half-indent verbs when they have a prefix.
         val entry = Entry(cursor, context!!)
-        val entryId = entry.id
-        val indent1 = if (entry.isIndented) if (entry.isVerb) "  " else "    " else ""
-        val indent2 = if (entry.isIndented) if (entry.isVerb) "   " else "      " else ""
+        val entryId = entry.getId()
+        val indent1 = if (entry.isIndented()) if (entry.isVerb()) "  " else "    " else ""
+        val indent2 = if (entry.isIndented()) if (entry.isVerb()) "   " else "      " else ""
         val entryName = indent1 + entry.getFormattedEntryName(isHtml = false)
         val formattedDefinition = indent2 + entry.getFormattedDefinition(isHtml = false)
         // TODO: Format the "alt" results.
@@ -419,84 +533,6 @@ class KlingonContentProvider : ContentProvider() {
         private var mNotes_FR = ""
         private var mExamples_FR = ""
         private var mSearchTags_FR = ""
-
-        // Public property accessors for compatibility with other Kotlin files
-        val id: Int get() = mId
-        val entryName: String get() = mEntryName
-        val partOfSpeech: String get() = mPartOfSpeech
-        val definition: String get() = mDefinition
-        val notes: String get() = getNotes()
-        val definition_DE: String get() = mDefinition_DE
-        val definition_FA: String get() = mDefinition_FA
-        val definition_SV: String get() = mDefinition_SV
-        val definition_RU: String get() = mDefinition_RU
-        val definition_ZH_HK: String get() = mDefinition_ZH_HK
-        val definition_PT: String get() = mDefinition_PT
-        val definition_FI: String get() = mDefinition_FI
-        val definition_FR: String get() = mDefinition_FR
-        val formattedEntryNameInKlingonFont: SpannableStringBuilder get() = getFormattedEntryNameInKlingonFont()
-        val textColor: Int get() = getTextColor()
-        val otherLanguageDefinition: String get() = getOtherLanguageDefinition()
-        val otherLanguageNotes: String get() = getOtherLanguageNotes()
-        val isAlternativeSpelling: Boolean get() = isAlternativeSpelling()
-        val isHypothetical: Boolean get() = isHypothetical()
-        val isExtendedCanon: Boolean get() = isExtendedCanon()
-        val synonyms: String get() = getSynonyms()
-        val antonyms: String get() = getAntonyms()
-        val seeAlso: String get() = getSeeAlso()
-        val components: String get() = getComponents()
-        val hiddenNotes: String get() = getHiddenNotes()
-        val examples: String get() = getExamples()
-        val source: String get() = getSource()
-        val homophoneNumber: Int get() = getHomophoneNumber()
-        val sentenceType: String get() = getSentenceType()
-        val sentenceTypeQuery: String get() = getSentenceTypeQuery()
-        val transitivityString: String get() = getTransitivityString()
-        val otherLanguageExamples: String get() = getOtherLanguageExamples()
-        val isSentence: Boolean get() = isSentence()
-        val isDerivative: Boolean get() = isDerivative()
-        val isInherentPlural: Boolean get() = isInherentPlural()
-        val isSingularFormOfInherentPlural: Boolean get() = isSingularFormOfInherentPlural()
-        val isPlural: Boolean get() = isPlural()
-        val isBeingCapableOfLanguage: Boolean get() = isBeingCapableOfLanguage()
-        val isBodyPart: Boolean get() = isBodyPart()
-        val isVerb: Boolean get() = isVerb()
-        val isSource: Boolean get() = isSource()
-        val isURL: Boolean get() = isURL()
-        val isNoun: Boolean get() = isNoun()
-        val isPrefix: Boolean get() = isPrefix()
-        val isSuffix: Boolean get() = isSuffix()
-        val isArchaic: Boolean get() = isArchaic()
-        val isPronoun: Boolean get() = isPronoun()
-        val isIndented: Boolean get() = isIndented()
-        val url: String get() = getURL()
-        val entryNameInKlingonFont: String get() = getEntryNameInKlingonFont()
-        val componentsAsEntries: ArrayList<Entry> get() = getComponentsAsEntries()
-        val searchTags: String get() = getSearchTags()
-        val notes_DE: String get() = getNotes_DE()
-        val examples_DE: String get() = getExamples_DE()
-        val searchTags_DE: String get() = getSearchTags_DE()
-        val notes_FA: String get() = getNotes_FA()
-        val examples_FA: String get() = getExamples_FA()
-        val searchTags_FA: String get() = getSearchTags_FA()
-        val notes_SV: String get() = getNotes_SV()
-        val examples_SV: String get() = getExamples_SV()
-        val searchTags_SV: String get() = getSearchTags_SV()
-        val notes_RU: String get() = getNotes_RU()
-        val examples_RU: String get() = getExamples_RU()
-        val searchTags_RU: String get() = getSearchTags_RU()
-        val notes_ZH_HK: String get() = getNotes_ZH_HK()
-        val examples_ZH_HK: String get() = getExamples_ZH_HK()
-        val searchTags_ZH_HK: String get() = getSearchTags_ZH_HK()
-        val notes_PT: String get() = getNotes_PT()
-        val examples_PT: String get() = getExamples_PT()
-        val searchTags_PT: String get() = getSearchTags_PT()
-        val notes_FI: String get() = getNotes_FI()
-        val examples_FI: String get() = getExamples_FI()
-        val searchTags_FI: String get() = getSearchTags_FI()
-        val notes_FR: String get() = getNotes_FR()
-        val examples_FR: String get() = getExamples_FR()
-        val searchTags_FR: String get() = getSearchTags_FR()
 
         // Part of speech metadata.
         enum class BasePartOfSpeechEnum {
@@ -2220,18 +2256,6 @@ class KlingonContentProvider : ContentProvider() {
     var mNumberSuffix = ""
     var mIsNumberLike = false
 
-    // Public property accessors for compatibility with other Kotlin files
-    val verbPrefix: String get() = getVerbPrefix()
-    val verbSuffixes: Array<String> get() = getVerbSuffixes()
-    val nounSuffixes: Array<String> get() = getNounSuffixes()
-    val numberRoot: String get() = getNumberRoot()
-    val numberRootAnnotation: String get() = getNumberRootAnnotation()
-    val numberModifier: String get() = getNumberModifier()
-    val numberSuffix: String get() = getNumberSuffix()
-    val verbPrefixString: String get() = getVerbPrefixString()
-    val suffixesString: String get() = getSuffixesString()
-    val isBareWord: Boolean get() = isBareWord()
-    val isNumberLike: Boolean get() = isNumberLike()
 
     // The locations of the true rovers. The value indicates the suffix type they appear after,
     // so 0 means they are attached directly to the verb (before any type 1 suffix).
@@ -2899,119 +2923,4 @@ class KlingonContentProvider : ContentProvider() {
     }
   }
 
-  // Attempt to parse this complex word, and if successful, add it to the given set.
-  fun parseComplexWord(
-      candidate: String, isNounCandidate: Boolean, complexWordsList: MutableList<ComplexWord>) {
-    val complexWord = ComplexWord(candidate, isNounCandidate)
-    if (BuildConfig.DEBUG) {
-      Log.d(TAG, "\n\n* parsing = " + candidate + " (" + (if (isNounCandidate) "n" else "v") + ") *")
-    }
-    if (!isNounCandidate) {
-      // Check prefix.
-      val strippedPrefixComplexWord = complexWord.stripPrefix()
-      if (strippedPrefixComplexWord != null) {
-        // Branch off a word with the prefix stripped.
-        stripSuffix(strippedPrefixComplexWord, complexWordsList)
-      }
-    }
-    // Check suffixes.
-    stripSuffix(complexWord, complexWordsList)
-  }
-
-  // Helper method to strip a level of suffix from a word.
-  private fun stripSuffix(
-      initialComplexWord: ComplexWord?, complexWordsList: MutableList<ComplexWord>) {
-    if (initialComplexWord == null) return
-    var complexWord: ComplexWord? = initialComplexWord
-    if (complexWord!!.hasNoMoreSuffixes()) {
-      if (BuildConfig.DEBUG) {
-        Log.d(TAG, "attempting to add to complex words list: " + complexWord.mUnparsedPart)
-      }
-      complexWord.addSelf(complexWordsList)
-
-      if (complexWord.mIsNounCandidate) {
-        // Attempt to get the verb root of this word if it's a noun.
-        complexWord = complexWord.getVerbRootIfNoun()
-      } else if (complexWord.isBareWord()) {
-        // Check for type 5 noun suffix on a possibly adjectival verb.
-        complexWord = complexWord.getAdjectivalVerbWithType5NounSuffix()
-        if (complexWord != null) {
-          val adjectivalVerb = complexWord.stem()
-          if (adjectivalVerb.endsWith("be'")
-              || adjectivalVerb.endsWith("qu'")
-              || adjectivalVerb.endsWith("Ha'")) {
-            val adjectivalVerbWithoutRover =
-                adjectivalVerb.substring(0, adjectivalVerb.length - 3)
-            // Adjectival verbs may end with a rover (except for {-Qo'}), so check for that here.
-            val anotherComplexWord =
-                ComplexWord(adjectivalVerbWithoutRover, complexWord)
-            if (adjectivalVerb.endsWith("be'")) {
-              anotherComplexWord.mVerbTypeRNegation = 0
-            } else if (adjectivalVerb.endsWith("qu'")) {
-              anotherComplexWord.mVerbTypeREmphatic = 0
-            } else if (adjectivalVerb.endsWith("Ha'")) {
-              anotherComplexWord.mVerbSuffixes[0] = 1
-            }
-            stripSuffix(anotherComplexWord, complexWordsList)
-          }
-        }
-      } else {
-        // We're done.
-        complexWord = null
-      }
-
-      if (complexWord == null) {
-        // Not a noun or the noun has no further verb root, so we're done with this complex word.
-        return
-      }
-      // Note that at this point we continue with a newly created complex word.
-    }
-
-    if (BuildConfig.DEBUG) {
-      val suffixType: String
-      if (complexWord!!.mIsNounCandidate) {
-        // Noun suffix level corresponds to the suffix type.
-        suffixType = "type " + complexWord.mSuffixLevel
-      } else {
-        // Verb suffix level doesn't correspond exactly: {-Ha'}, types 1 through 8, {-Qo'}, then 9.
-        if (complexWord.mSuffixLevel == 1) {
-          suffixType = "-Ha'"
-        } else if (complexWord.mSuffixLevel == 10) {
-          suffixType = "-Qo'"
-        } else if (complexWord.mSuffixLevel == 11) {
-          suffixType = "type 9"
-        } else {
-          suffixType = "type " + (complexWord.mSuffixLevel - 1)
-        }
-      }
-      Log.d(
-          TAG,
-          "stripSuffix called on {"
-              + complexWord.mUnparsedPart
-              + "} for "
-              + if (complexWord.mIsNounCandidate) "noun" else "verb"
-              + " suffix: "
-              + suffixType)
-    }
-
-    // Special check for the suffix {-oy} attached to a noun ending in a vowel. This needs to be
-    // done additionally to the regular check, since it may be possible to parse a word either way,
-    // e.g., {ghu'oy} could be {ghu} + {-'oy} or {ghu'} + {-oy}.
-    val apostropheOyComplexWord = complexWord.maybeStripApostropheOy()
-    if (apostropheOyComplexWord != null) {
-      // "'oy" was stripped, branch using it as a new candidate.
-      stripSuffix(apostropheOyComplexWord, complexWordsList)
-    }
-
-    // Attempt to strip one level of suffix.
-    val strippedSuffixComplexWord = complexWord.stripSuffixAndBranch()
-    if (strippedSuffixComplexWord != null) {
-      // A suffix of the current type was found, branch using it as a new candidate.
-      stripSuffix(strippedSuffixComplexWord, complexWordsList)
-    }
-    // Tail recurse to the next level of suffix. Note that the suffix level is decremented in
-    // complexWord.stripSuffixAndBranch() above.
-    stripSuffix(complexWord, complexWordsList)
-  }
 }
-

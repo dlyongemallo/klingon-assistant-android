@@ -205,11 +205,11 @@ class KlingonContentDatabase(context: Context) {
 
         // Parse the query's metadata, and get the base query.
         val queryEntry = KlingonContentProvider.Entry(processedQuery, mContext)
-        val queryBase = queryEntry.entryName
+        val queryBase = queryEntry.getEntryName()
 
         // If the query has components specified, then we're in analysis mode, and the solution is
         // already given to us.
-        val analysisComponents = queryEntry.componentsAsEntries
+        val analysisComponents = queryEntry.getComponentsAsEntries()
         if (analysisComponents.isNotEmpty()) {
             // Add the given list of components to the results.
             addGivenComponentsToResults(analysisComponents, resultsCursor, resultsSet)
@@ -224,7 +224,7 @@ class KlingonContentDatabase(context: Context) {
         val looseQuery: String = when {
             query.indexOf(':') != -1 -> {
                 // If this is a system query, don't use "xifan hol" loosening.
-                if (queryBase == "*" && queryEntry.isSentence) {
+                if (queryBase == "*" && queryEntry.isSentence()) {
                     // Specifically, if this is a query for a sentence class, search exactly for the matching
                     // sentences.
                     // We know the query begins with "*:" so strip that to get the sentence class.
@@ -265,7 +265,7 @@ class KlingonContentDatabase(context: Context) {
             // Klingon, but 2 characters allow searching from the end for
             // "rhyming" purposes.
             val klingonNonPrefixMinLength = 2
-            if (queryEntry.entryName.length >= klingonNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= klingonNonPrefixMinLength) {
                 val resultsWithGivenQueryCursor =
                     getEntriesContainingQuery(looseQuery, /* isPrefix */ false)
                 copyCursorEntries(
@@ -306,7 +306,7 @@ class KlingonContentDatabase(context: Context) {
             val englishNonPrefixMinLength = 3
             val otherLanguageNonPrefixMinLength = if (otherLang == "zh-HK") 1 else 3
 
-            if (queryEntry.entryName.length >= englishNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= englishNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false, /* isPrefix */
@@ -316,7 +316,7 @@ class KlingonContentDatabase(context: Context) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= otherLanguageNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= otherLanguageNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false, /* isPrefix */
@@ -328,7 +328,7 @@ class KlingonContentDatabase(context: Context) {
             }
 
             // Match search tags, from beginning, then anywhere else.
-            if (queryEntry.entryName.length >= englishNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= englishNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     true, /* isPrefix */
@@ -338,7 +338,7 @@ class KlingonContentDatabase(context: Context) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= otherLanguageNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= otherLanguageNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     true, /* isPrefix */
@@ -348,7 +348,7 @@ class KlingonContentDatabase(context: Context) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= englishNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= englishNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false, /* isPrefix */
@@ -358,7 +358,7 @@ class KlingonContentDatabase(context: Context) {
                     resultsSet
                 )
             }
-            if (queryEntry.entryName.length >= otherLanguageNonPrefixMinLength) {
+            if (queryEntry.getEntryName().length >= otherLanguageNonPrefixMinLength) {
                 matchDefinitionsOrSearchTags(
                     queryBase,
                     false, /* isPrefix */
@@ -387,11 +387,11 @@ class KlingonContentDatabase(context: Context) {
         var currentPrefixEntry: KlingonContentProvider.Entry? = null
         var verbSuffixLevel = 0
         for (componentEntry in analysisComponents) {
-            val componentEntryName = componentEntry.entryName
-            val isNoun = componentEntry.isNoun
-            val isVerb = componentEntry.isVerb
-            val isPrefix = componentEntry.isPrefix
-            val isSuffix = componentEntry.isSuffix
+            val componentEntryName = componentEntry.getEntryName()
+            val isNoun = componentEntry.isNoun()
+            val isVerb = componentEntry.isVerb()
+            val isPrefix = componentEntry.isPrefix()
+            val isSuffix = componentEntry.isSuffix()
 
             if (!isSuffix && (!isVerb || currentPrefixEntry == null)) {
                 // A new word is about to begin, so flush a complex word if there is one.
@@ -427,10 +427,10 @@ class KlingonContentDatabase(context: Context) {
                 // Note that this can be a noun, a verb, or an unattached suffix (like in the entry {...-Daq
                 // qaDor.}.
                 val newComplexWord = KlingonContentProvider.ComplexWord(componentEntryName, isNoun)
-                newComplexWord.setHomophoneNumber(componentEntry.homophoneNumber)
+                newComplexWord.setHomophoneNumber(componentEntry.getHomophoneNumber())
                 verbSuffixLevel = 0
                 if (isVerb && currentPrefixEntry != null) {
-                    newComplexWord.attachPrefix(currentPrefixEntry.entryName)
+                    newComplexWord.attachPrefix(currentPrefixEntry.getEntryName())
                     currentPrefixEntry = null
                 }
                 currentComplexWord = newComplexWord
@@ -462,7 +462,7 @@ class KlingonContentDatabase(context: Context) {
                 if (!filter || queryEntry!!.isSatisfiedBy(resultEntry)) {
                     // Prevent duplicates.
                     val entryObject = convertEntryToCursorRow(resultEntry, /* indent */ false)
-                    val intId = resultEntry.id
+                    val intId = resultEntry.getId()
                     if (!destSet.contains(intId)) {
                         destSet.add(intId)
                         destCursor.addRow(entryObject)
@@ -716,7 +716,7 @@ class KlingonContentDatabase(context: Context) {
         var stemAdded = false
         if (exactMatchesCursor != null && exactMatchesCursor.count != 0) {
             Log.d(TAG, "found stem = ${complexWord.stem()}")
-            val prefix = complexWord.verbPrefix
+            val prefix = complexWord.getVerbPrefix()
 
             // Add all exact matches for stem.
             exactMatchesCursor.moveToFirst()
@@ -727,18 +727,18 @@ class KlingonContentDatabase(context: Context) {
                 // part of a complex word. However, allow slang, regional, and extended canon. Also,
                 // verbs are satisfied by pronouns, but we exclude a pronoun if there is a prefix.
                 if (filterEntry.isSatisfiedBy(resultEntry) &&
-                    !resultEntry.isArchaic &&
-                    !resultEntry.isHypothetical &&
-                    !(resultEntry.isPronoun && prefix != "")
+                    !resultEntry.isArchaic() &&
+                    !resultEntry.isHypothetical() &&
+                    !(resultEntry.isPronoun() && prefix != "")
                 ) {
                     Log.d(
                         TAG,
-                        "adding: ${resultEntry.entryName} (${resultEntry.partOfSpeech})"
+                        "adding: ${resultEntry.getEntryName()} (${resultEntry.getPartOfSpeech()})"
                     )
 
                     // If this is a bare word, prevent duplicates.
-                    val intId = resultEntry.id
-                    if (!complexWord.isBareWord || !resultsSet.contains(intId) || !isLenient) {
+                    val intId = resultEntry.getId()
+                    if (!complexWord.isBareWord() || !resultsSet.contains(intId) || !isLenient) {
                         // Add the verb prefix if one exists, before the verb stem itself.
                         if (prefix != "" && !prefixAdded) {
                             Log.d(TAG, "verb prefix = $prefix")
@@ -750,11 +750,11 @@ class KlingonContentDatabase(context: Context) {
                         val exactMatchObject = complexWordCursorRow(resultEntry, complexWord, prefixAdded)
 
                         if (BuildConfig.DEBUG) {
-                            Log.d(TAG, "addComplexWordToResults: ${resultEntry.entryName}")
+                            Log.d(TAG, "addComplexWordToResults: ${resultEntry.getEntryName()}")
                         }
                         resultsCursor.addRow(exactMatchObject)
                         stemAdded = true
-                        if (complexWord.isBareWord) {
+                        if (complexWord.isBareWord()) {
                             resultsSet.add(intId)
                         }
                     }
@@ -764,11 +764,11 @@ class KlingonContentDatabase(context: Context) {
         }
 
         // Whether or not there was an exact match, if the complex word is a number, add its components.
-        if (complexWord.isNumberLike) {
-            val numberRoot = complexWord.numberRoot
-            val numberRootAnnotation = complexWord.numberRootAnnotation
-            val numberModifier = complexWord.numberModifier
-            val numberSuffix = complexWord.numberSuffix
+        if (complexWord.isNumberLike()) {
+            val numberRoot = complexWord.getNumberRoot()
+            val numberRootAnnotation = complexWord.getNumberRootAnnotation()
+            val numberModifier = complexWord.getNumberModifier()
+            val numberSuffix = complexWord.getNumberSuffix()
 
             // First, add the root as a word. (The annotation is already included.)
             if (numberRoot != "" && (!stemAdded || numberRoot != complexWord.stem())) {
@@ -799,7 +799,7 @@ class KlingonContentDatabase(context: Context) {
             // Add verb suffixes. Verb suffixes must go before noun suffixes since two of them
             // can turn a verb into a noun.
             // For purposes of analysis, pronouns are also verbs, but they cannot have prefixes.
-            val verbSuffixes = complexWord.verbSuffixes
+            val verbSuffixes = complexWord.getVerbSuffixes()
             for (j in verbSuffixes.indices) {
                 // Check verb suffix of the current type.
                 if (verbSuffixes[j] != "") {
@@ -818,7 +818,7 @@ class KlingonContentDatabase(context: Context) {
             }
 
             // Add noun suffixes.
-            val nounSuffixes = complexWord.nounSuffixes
+            val nounSuffixes = complexWord.getNounSuffixes()
             for (j in nounSuffixes.indices) {
                 if (nounSuffixes[j] != "") {
                     Log.d(TAG, "noun suffix = ${nounSuffixes[j]}")
@@ -836,103 +836,103 @@ class KlingonContentDatabase(context: Context) {
     ): Array<Any> {
         // TODO: Add warnings for mismatched affixes here.
         return arrayOf(
-            entry.id,
-            complexWord.verbPrefixString + entry.entryName + complexWord.suffixesString,
+            entry.getId(),
+            complexWord.getVerbPrefixString() + entry.getEntryName() + complexWord.getSuffixesString(),
             // This works only because all verbs are tagged with transitivity information, so we know the
             // POS looks like "v:t" which we turn into "v:t,indent".
-            entry.partOfSpeech + if (indent) ",indent" else "",
-            entry.definition,
-            entry.synonyms,
-            entry.antonyms,
-            entry.seeAlso,
-            entry.notes,
-            entry.hiddenNotes,
-            entry.components,
-            entry.examples,
-            entry.searchTags,
-            entry.source,
-            entry.definition_DE,
-            entry.notes_DE,
-            entry.examples_DE,
-            entry.searchTags_DE,
-            entry.definition_FA,
-            entry.notes_FA,
-            entry.examples_FA,
-            entry.searchTags_FA,
-            entry.definition_SV,
-            entry.notes_SV,
-            entry.examples_SV,
-            entry.searchTags_SV,
-            entry.definition_RU,
-            entry.notes_RU,
-            entry.examples_RU,
-            entry.searchTags_RU,
-            entry.definition_ZH_HK,
-            entry.notes_ZH_HK,
-            entry.examples_ZH_HK,
-            entry.searchTags_ZH_HK,
-            entry.definition_PT,
-            entry.notes_PT,
-            entry.examples_PT,
-            entry.searchTags_PT,
-            entry.definition_FI,
-            entry.notes_FI,
-            entry.examples_FI,
-            entry.searchTags_FI,
-            entry.definition_FR,
-            entry.notes_FR,
-            entry.examples_FR,
-            entry.searchTags_FR,
+            entry.getPartOfSpeech() + if (indent) ",indent" else "",
+            entry.getDefinition(),
+            entry.getSynonyms(),
+            entry.getAntonyms(),
+            entry.getSeeAlso(),
+            entry.getNotes(),
+            entry.getHiddenNotes(),
+            entry.getComponents(),
+            entry.getExamples(),
+            entry.getSearchTags(),
+            entry.getSource(),
+            entry.getDefinition_DE(),
+            entry.getNotes_DE(),
+            entry.getExamples_DE(),
+            entry.getSearchTags_DE(),
+            entry.getDefinition_FA(),
+            entry.getNotes_FA(),
+            entry.getExamples_FA(),
+            entry.getSearchTags_FA(),
+            entry.getDefinition_SV(),
+            entry.getNotes_SV(),
+            entry.getExamples_SV(),
+            entry.getSearchTags_SV(),
+            entry.getDefinition_RU(),
+            entry.getNotes_RU(),
+            entry.getExamples_RU(),
+            entry.getSearchTags_RU(),
+            entry.getDefinition_ZH_HK(),
+            entry.getNotes_ZH_HK(),
+            entry.getExamples_ZH_HK(),
+            entry.getSearchTags_ZH_HK(),
+            entry.getDefinition_PT(),
+            entry.getNotes_PT(),
+            entry.getExamples_PT(),
+            entry.getSearchTags_PT(),
+            entry.getDefinition_FI(),
+            entry.getNotes_FI(),
+            entry.getExamples_FI(),
+            entry.getSearchTags_FI(),
+            entry.getDefinition_FR(),
+            entry.getNotes_FR(),
+            entry.getExamples_FR(),
+            entry.getSearchTags_FR(),
         )
     }
 
     private fun convertEntryToCursorRow(entry: KlingonContentProvider.Entry, indent: Boolean): Array<Any> {
         return arrayOf(
-            entry.id,
-            entry.entryName,
-            entry.partOfSpeech + if (indent) ",indent" else "",
-            entry.definition,
-            entry.synonyms,
-            entry.antonyms,
-            entry.seeAlso,
-            entry.notes,
-            entry.hiddenNotes,
-            entry.components,
-            entry.examples,
-            entry.searchTags,
-            entry.source,
-            entry.definition_DE,
-            entry.notes_DE,
-            entry.examples_DE,
-            entry.searchTags_DE,
-            entry.definition_FA,
-            entry.notes_FA,
-            entry.examples_FA,
-            entry.searchTags_FA,
-            entry.definition_SV,
-            entry.notes_SV,
-            entry.examples_SV,
-            entry.searchTags_SV,
-            entry.definition_RU,
-            entry.notes_RU,
-            entry.examples_RU,
-            entry.searchTags_RU,
-            entry.definition_ZH_HK,
-            entry.notes_ZH_HK,
-            entry.examples_ZH_HK,
-            entry.searchTags_ZH_HK,
-            entry.definition_PT,
-            entry.notes_PT,
-            entry.examples_PT,
-            entry.searchTags_PT,
-            entry.definition_FI,
-            entry.notes_FI,
-            entry.examples_FI,
-            entry.searchTags_FI,
-            entry.definition_FR,
-            entry.notes_FR,
-            entry.examples_FR,
-            entry.searchTags_FR,
+            entry.getId(),
+            entry.getEntryName(),
+            entry.getPartOfSpeech() + if (indent) ",indent" else "",
+            entry.getDefinition(),
+            entry.getSynonyms(),
+            entry.getAntonyms(),
+            entry.getSeeAlso(),
+            entry.getNotes(),
+            entry.getHiddenNotes(),
+            entry.getComponents(),
+            entry.getExamples(),
+            entry.getSearchTags(),
+            entry.getSource(),
+            entry.getDefinition_DE(),
+            entry.getNotes_DE(),
+            entry.getExamples_DE(),
+            entry.getSearchTags_DE(),
+            entry.getDefinition_FA(),
+            entry.getNotes_FA(),
+            entry.getExamples_FA(),
+            entry.getSearchTags_FA(),
+            entry.getDefinition_SV(),
+            entry.getNotes_SV(),
+            entry.getExamples_SV(),
+            entry.getSearchTags_SV(),
+            entry.getDefinition_RU(),
+            entry.getNotes_RU(),
+            entry.getExamples_RU(),
+            entry.getSearchTags_RU(),
+            entry.getDefinition_ZH_HK(),
+            entry.getNotes_ZH_HK(),
+            entry.getExamples_ZH_HK(),
+            entry.getSearchTags_ZH_HK(),
+            entry.getDefinition_PT(),
+            entry.getNotes_PT(),
+            entry.getExamples_PT(),
+            entry.getSearchTags_PT(),
+            entry.getDefinition_FI(),
+            entry.getNotes_FI(),
+            entry.getExamples_FI(),
+            entry.getSearchTags_FI(),
+            entry.getDefinition_FR(),
+            entry.getNotes_FR(),
+            entry.getExamples_FR(),
+            entry.getSearchTags_FR(),
         )
     }
 

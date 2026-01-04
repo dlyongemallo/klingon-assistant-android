@@ -260,7 +260,7 @@ class KlingonAssistant : BaseActivity() {
             view.text1.textSize = 22f
 
             // TODO: Colour attached affixes differently from verb.
-            view.text1.setTextColor(entry.textColor)
+            view.text1.setTextColor(entry.getTextColor())
 
             // Use sans serif for the definition.
             view.text2.typeface = Typeface.SANS_SERIF
@@ -315,10 +315,10 @@ class KlingonAssistant : BaseActivity() {
 
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
         val queryEntry = KlingonContentProvider.Entry(cleanQuery, baseContext)
-        val qWillBeRemapped = queryEntry.entryName.contains('q') &&
+        val qWillBeRemapped = queryEntry.getEntryName().contains('q') &&
                 sharedPrefs.getBoolean(Preferences.KEY_XIFAN_HOL_CHECKBOX_PREFERENCE, /* default */ false) &&
                 sharedPrefs.getBoolean(Preferences.KEY_SWAP_QS_CHECKBOX_PREFERENCE, /* default */ false)
-        var entryNameWithPoS = queryEntry.entryName + queryEntry.getBracketedPartOfSpeech(/* isHtml */ true)
+        var entryNameWithPoS = queryEntry.getEntryName() + queryEntry.getBracketedPartOfSpeech(/* isHtml */ true)
         if (!overrideXifanHol && qWillBeRemapped) {
             // Alert the user to the visual inconsistency of the query containing "q" but the results
             // containing {Q} instead, as some users forget that they have this option activated in their
@@ -331,14 +331,14 @@ class KlingonAssistant : BaseActivity() {
             // There are no results.
             mTextView.text = Html.fromHtml(getString(R.string.no_results, entryNameWithPoS))
             // The user probably made a typo, so allow them to edit the query.
-            mPrepopulatedQuery = queryEntry.entryName
+            mPrepopulatedQuery = queryEntry.getEntryName()
         } else {
             // Display the number of results.
             val count = cursor.count
             val countString: String
-            if (queryEntry.entryName == "*") {
+            if (queryEntry.getEntryName() == "*") {
                 // Searching for a class of phrases.
-                countString = queryEntry.sentenceType.let {
+                countString = queryEntry.getSentenceType().let {
                     if (it.isEmpty()) {
                         // The sentence type was indeterminate.
                         // This only ever happens if the user enters "*:sen" as a search string.
@@ -356,7 +356,7 @@ class KlingonAssistant : BaseActivity() {
                     entryNameWithPoS
                 )
                 // Allow the user to edit the query by pressing the search button.
-                mPrepopulatedQuery = queryEntry.entryName
+                mPrepopulatedQuery = queryEntry.getEntryName()
                 // If "xifan hol" mode was overridden (disabled) to get this set of search results, but it
                 // is currently enabled by the user with q mapped to Q, then we ensure that if the user
                 // edits the search query, that it performs a search with "xifan hol" overridden again.

@@ -59,10 +59,10 @@ class EntryFragment : Fragment() {
         // Note: managedQuery is deprecated since API 11.
         val cursor = requireActivity().managedQuery(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)
         val entry = KlingonContentProvider.Entry(cursor, requireActivity().baseContext)
-        val entryId = entry.id
+        val entryId = entry.getId()
 
         // Handle alternative spellings here.
-        if (entry.isAlternativeSpelling) {
+        if (entry.isAlternativeSpelling()) {
             // TODO: Immediate redirect to query in entry.getDefinition();
         }
 
@@ -75,15 +75,15 @@ class EntryFragment : Fragment() {
         val klingonTypeface = KlingonAssistant.getKlingonFontTypeface(requireActivity().baseContext)
         if (useKlingonFont) {
             // Preference is set to display this in {pIqaD}!
-            entryTitle.text = entry.formattedEntryNameInKlingonFont
+            entryTitle.text = entry.getFormattedEntryNameInKlingonFont()
         } else {
             // Boring transcription based on English (Latin) alphabet.
             entryTitle.text = Html.fromHtml(entry.getFormattedEntryName(/* isHtml = */ true))
         }
-        mEntryName = entry.entryName
+        mEntryName = entry.getEntryName()
 
         // Set the colour for the entry name depending on its part of speech.
-        entryTitle.setTextColor(entry.textColor)
+        entryTitle.setTextColor(entry.getTextColor())
 
         // Create the expanded definition.
         val pos = entry.getFormattedPartOfSpeech(/* isHtml = */ false)
@@ -91,7 +91,7 @@ class EntryFragment : Fragment() {
 
         // Determine whether to show the other-language definition. If shown, it is primary, and the
         // English definition is shown as secondary.
-        val englishDefinition = entry.definition
+        val englishDefinition = entry.getDefinition()
         val displayOtherLanguageEntry = entry.shouldDisplayOtherLanguageDefinition()
         var englishDefinitionStart = -1
         val englishDefinitionHeader = "\n" + resources.getString(R.string.label_english) + ": "
@@ -102,7 +102,7 @@ class EntryFragment : Fragment() {
         } else {
             // We display the other-language definition as the primary one, but keep track of the location
             // of the English definition to change its font size later.
-            otherLanguageDefinition = entry.otherLanguageDefinition
+            otherLanguageDefinition = entry.getOtherLanguageDefinition()
             expandedDefinition += otherLanguageDefinition
             englishDefinitionStart = expandedDefinition.length
             expandedDefinition += englishDefinitionHeader + englishDefinition
@@ -112,15 +112,15 @@ class EntryFragment : Fragment() {
         val showUnsupportedFeatures = sharedPrefs.getBoolean(
             Preferences.KEY_SHOW_UNSUPPORTED_FEATURES_CHECKBOX_PREFERENCE, /* default */ false
         )
-        if (!entry.isAlternativeSpelling && showUnsupportedFeatures) {
-            val definition_DE = entry.definition_DE
-            val definition_FA = entry.definition_FA
-            val definition_SV = entry.definition_SV
-            val definition_RU = entry.definition_RU
-            val definition_ZH_HK = entry.definition_ZH_HK
-            val definition_PT = entry.definition_PT
-            val definition_FI = entry.definition_FI
-            val definition_FR = entry.definition_FR
+        if (!entry.isAlternativeSpelling() && showUnsupportedFeatures) {
+            val definition_DE = entry.getDefinition_DE()
+            val definition_FA = entry.getDefinition_FA()
+            val definition_SV = entry.getDefinition_SV()
+            val definition_RU = entry.getDefinition_RU()
+            val definition_ZH_HK = entry.getDefinition_ZH_HK()
+            val definition_PT = entry.getDefinition_PT()
+            val definition_FI = entry.getDefinition_FI()
+            val definition_FR = entry.getDefinition_FR()
 
             // Show the other-language definition here only if it isn't already shown as the primary
             // definition (and the experimental flag is set to true).
@@ -154,7 +154,7 @@ class EntryFragment : Fragment() {
         // Show the basic notes.
         var notes: String
         if (entry.shouldDisplayOtherLanguageNotes()) {
-            notes = entry.otherLanguageNotes
+            notes = entry.getOtherLanguageNotes()
             if (notes.contains("[AUTOTRANSLATED]") || (showUnsupportedFeatures && notes.isNotEmpty())) {
                 // In showUnsupportedFeatures mode, if the notes are suppressed, display a message so it's
                 // clear that this is what's happened (i.e., not just that the non-English notes were
@@ -165,34 +165,34 @@ class EntryFragment : Fragment() {
                 }
                 // If notes are autotranslated, or unsupported features are enabled, display original
                 // English notes also.
-                notes += "\n\n" + entry.notes
+                notes += "\n\n" + entry.getNotes()
             } else if (notes == "-") {
                 // If the non-English notes is just the string "-", this indicates that the display of
                 // notes should be suppressed.
                 notes = ""
             }
         } else {
-            notes = entry.notes
+            notes = entry.getNotes()
         }
         if (notes.isNotEmpty()) {
             expandedDefinition += "\n\n$notes"
         }
 
         // If this entry is hypothetical or extended canon, display warnings.
-        if (entry.isHypothetical || entry.isExtendedCanon) {
+        if (entry.isHypothetical() || entry.isExtendedCanon()) {
             expandedDefinition += "\n\n"
-            if (entry.isHypothetical) {
+            if (entry.isHypothetical()) {
                 expandedDefinition += resources.getString(R.string.warning_hypothetical)
             }
-            if (entry.isExtendedCanon) {
+            if (entry.isExtendedCanon()) {
                 expandedDefinition += resources.getString(R.string.warning_extended_canon)
             }
         }
 
         // Show synonyms, antonyms, and related entries.
-        val synonyms = entry.synonyms
-        val antonyms = entry.antonyms
-        val seeAlso = entry.seeAlso
+        val synonyms = entry.getSynonyms()
+        val antonyms = entry.getAntonyms()
+        val seeAlso = entry.getSeeAlso()
         if (synonyms.isNotEmpty()) {
             expandedDefinition += "\n\n" + resources.getString(R.string.label_synonyms) + ": $synonyms"
         }
@@ -205,18 +205,18 @@ class EntryFragment : Fragment() {
 
         // Display components if that field is not empty, unless we are showing an analysis link, in
         // which case we want to hide the components.
-        val showAnalysis = entry.isSentence || entry.isDerivative
-        val components = entry.components
+        val showAnalysis = entry.isSentence() || entry.isDerivative()
+        val components = entry.getComponents()
         if (components.isNotEmpty()) {
             // Treat the components column of inherent plurals and their
             // singulars differently than for other entries.
             when {
-                entry.isInherentPlural -> {
+                entry.isInherentPlural() -> {
                     expandedDefinition += "\n\n" + String.format(
                         resources.getString(R.string.info_inherent_plural), components
                     )
                 }
-                entry.isSingularFormOfInherentPlural -> {
+                entry.isSingularFormOfInherentPlural() -> {
                     expandedDefinition += "\n\n" + String.format(
                         resources.getString(R.string.info_singular_form), components
                     )
@@ -229,34 +229,34 @@ class EntryFragment : Fragment() {
         }
 
         // Display plural information.
-        if (!entry.isPlural && !entry.isInherentPlural && !entry.isSingularFormOfInherentPlural) {
+        if (!entry.isPlural() && !entry.isInherentPlural() && !entry.isSingularFormOfInherentPlural()) {
             when {
-                entry.isBeingCapableOfLanguage -> {
+                entry.isBeingCapableOfLanguage() -> {
                     expandedDefinition += "\n\n" + resources.getString(R.string.info_being)
                 }
-                entry.isBodyPart -> {
+                entry.isBodyPart() -> {
                     expandedDefinition += "\n\n" + resources.getString(R.string.info_body)
                 }
             }
         }
 
         // If the entry is a useful phrase, link back to its category.
-        if (entry.isSentence) {
-            val sentenceType = entry.sentenceType
+        if (entry.isSentence()) {
+            val sentenceType = entry.getSentenceType()
             if (sentenceType.isNotEmpty()) {
                 // Put the query as a placeholder for the actual category.
                 expandedDefinition += "\n\n" + resources.getString(R.string.label_category) + ": {" +
-                        entry.sentenceTypeQuery + "}"
+                        entry.getSentenceTypeQuery() + "}"
             }
         }
 
         // If the entry is a sentence, make a link to analyse its components.
         if (showAnalysis) {
-            var analysisQuery = entry.entryName
+            var analysisQuery = entry.getEntryName()
             if (components.isNotEmpty()) {
                 // Strip the brackets around each component so they won't be processed.
-                analysisQuery += ":" + entry.partOfSpeech
-                val homophoneNumber = entry.homophoneNumber
+                analysisQuery += ":" + entry.getPartOfSpeech()
+                val homophoneNumber = entry.getHomophoneNumber()
                 if (homophoneNumber != -1) {
                     analysisQuery += ":$homophoneNumber"
                 }
@@ -267,28 +267,28 @@ class EntryFragment : Fragment() {
 
         // Show the examples.
         val examples: String = if (entry.shouldDisplayOtherLanguageExamples()) {
-            entry.otherLanguageExamples
+            entry.getOtherLanguageExamples()
         } else {
-            entry.examples
+            entry.getExamples()
         }
         if (examples.isNotEmpty()) {
             expandedDefinition += "\n\n" + resources.getString(R.string.label_examples) + ": $examples"
         }
 
         // Show the source.
-        val source = entry.source
+        val source = entry.getSource()
         if (source.isNotEmpty()) {
             expandedDefinition += "\n\n" + resources.getString(R.string.label_sources) + ": $source"
         }
 
         // If this is a verb (but not a prefix or suffix), show the transitivity information.
         var transitivity = ""
-        if (entry.isVerb && sharedPrefs.getBoolean(
+        if (entry.isVerb() && sharedPrefs.getBoolean(
                 Preferences.KEY_SHOW_TRANSITIVITY_CHECKBOX_PREFERENCE, /* default */ true
             )
         ) {
             // This is a verb and show transitivity preference is set to true.
-            transitivity = entry.transitivityString
+            transitivity = entry.getTransitivityString()
         }
         var transitivityStart = -1
         val transitivityHeader = "\n\n" + resources.getString(R.string.label_transitivity) + ": "
@@ -305,7 +305,7 @@ class EntryFragment : Fragment() {
             )
         ) {
             // Show additional information preference set to true.
-            hiddenNotes = entry.hiddenNotes
+            hiddenNotes = entry.getHiddenNotes()
         }
         var hiddenNotesStart = -1
         val hiddenNotesHeader = "\n\n" + resources.getString(R.string.label_additional_information) + ": "
@@ -379,22 +379,22 @@ class EntryFragment : Fragment() {
             // Log.d(TAG, "linkedEntry.getEntryName() = " + linkedEntry.getEntryName());
 
             // Delete the brackets and metadata parts of the string (which includes analysis components).
-            ssb.delete(m.start() + 1 + linkedEntry.entryName.length, m.end())
+            ssb.delete(m.start() + 1 + linkedEntry.getEntryName().length, m.end())
             ssb.delete(m.start(), m.start() + 1)
-            var end = m.start() + linkedEntry.entryName.length
+            var end = m.start() + linkedEntry.getEntryName().length
 
             // Insert link to the category for a useful phrase.
             if (entry != null &&
-                entry.isSentence &&
-                entry.sentenceType.isNotEmpty() &&
-                linkedEntry.entryName == "*"
+                entry.isSentence() &&
+                entry.getSentenceType().isNotEmpty() &&
+                linkedEntry.getEntryName() == "*"
             ) {
                 // Delete the "*" placeholder.
                 ssb.delete(m.start(), m.start() + 1)
 
                 // Insert the category name.
-                ssb.insert(m.start(), entry.sentenceType)
-                end += entry.sentenceType.length - 1
+                ssb.insert(m.start(), entry.getSentenceType())
+                end += entry.getSentenceType().length - 1
             }
 
             // Set the font and link.
@@ -403,14 +403,14 @@ class EntryFragment : Fragment() {
             // (either a source link or a direct URL link).
             val disableEntryLink = (entry == null) ||
                     linkedEntry.doNotLink() ||
-                    linkedEntry.isSource ||
-                    linkedEntry.isURL
+                    linkedEntry.isSource() ||
+                    linkedEntry.isURL()
             // The last span set on a range must have FINAL_FLAGS.
             val maybeFinalFlags = if (disableEntryLink) FINAL_FLAGS else INTERMEDIATE_FLAGS
             when {
-                linkedEntry.isSource -> {
+                linkedEntry.isSource() -> {
                     // If possible, link to the source.
-                    val url = linkedEntry.url
+                    val url = linkedEntry.getURL()
                     if (url.isNotEmpty()) {
                         ssb.setSpan(URLSpan(url), m.start(), end, INTERMEDIATE_FLAGS)
                     }
@@ -419,9 +419,9 @@ class EntryFragment : Fragment() {
                         StyleSpan(Typeface.ITALIC), m.start(), end, maybeFinalFlags
                     )
                 }
-                linkedEntry.isURL -> {
+                linkedEntry.isURL() -> {
                     // Linkify URL if there is one.
-                    val url = linkedEntry.url
+                    val url = linkedEntry.getURL()
                     if (url.isNotEmpty()) {
                         ssb.setSpan(URLSpan(url), m.start(), end, maybeFinalFlags)
                     }
@@ -432,9 +432,9 @@ class EntryFragment : Fragment() {
                     var replaceWithKlingonFontText = false
                     var klingonEntryName: String? = null
                     when {
-                        linkedEntry.entryName != "*" -> {
+                        linkedEntry.getEntryName() != "*" -> {
                             // This is just regular Klingon text. Display it in Klingon font.
-                            klingonEntryName = linkedEntry.entryNameInKlingonFont
+                            klingonEntryName = linkedEntry.getEntryNameInKlingonFont()
                             replaceWithKlingonFontText = true
                         }
                         Preferences.useKlingonUI(requireActivity().baseContext) -> {
@@ -442,7 +442,7 @@ class EntryFragment : Fragment() {
                             // Klingon.
                             // Display it in Klingon font.
                             klingonEntryName =
-                                KlingonContentProvider.convertStringToKlingonFont(entry?.sentenceType ?: "")
+                                KlingonContentProvider.convertStringToKlingonFont(entry?.getSentenceType() ?: "")
                             replaceWithKlingonFontText = true
                         }
                         else -> {
@@ -470,7 +470,7 @@ class EntryFragment : Fragment() {
                 }
             }
             // If linked entry is hypothetical or extended canon, insert a "?" in front.
-            if (linkedEntry.isHypothetical || linkedEntry.isExtendedCanon) {
+            if (linkedEntry.isHypothetical() || linkedEntry.isExtendedCanon()) {
                 ssb.insert(m.start(), "?")
                 ssb.setSpan(
                     RelativeSizeSpan(smallTextScale), m.start(), m.start() + 1, INTERMEDIATE_FLAGS
@@ -500,7 +500,7 @@ class EntryFragment : Fragment() {
             for (span in oldSpans) {
                 ssb.removeSpan(span)
             }
-            ssb.setSpan(ForegroundColorSpan(linkedEntry.textColor), m.start(), end, FINAL_FLAGS)
+            ssb.setSpan(ForegroundColorSpan(linkedEntry.getTextColor()), m.start(), end, FINAL_FLAGS)
             val linkedPos = linkedEntry.getBracketedPartOfSpeech(/* isHtml = */ false)
             if (linkedPos.isNotEmpty() && linkedPos.length > 1) {
                 ssb.insert(end, linkedPos)

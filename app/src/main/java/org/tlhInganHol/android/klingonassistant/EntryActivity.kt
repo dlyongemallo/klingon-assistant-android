@@ -135,7 +135,7 @@ class EntryActivity : BaseActivity(),
         // Note: managedQuery is deprecated since API 11.
         val cursor = managedQuery(queryUri, KlingonContentDatabase.ALL_KEYS, null, null, null)
         val entry = KlingonContentProvider.Entry(cursor, baseContext)
-        val entryId = entry.id
+        val entryId = entry.getId()
 
         // Update the entry, which is used for TTS output. This is also updated in onPageSelected.
         mEntry = entry
@@ -243,7 +243,7 @@ class EntryActivity : BaseActivity(),
 
     // Set the share intent for this entry.
     private fun setShareEntryIntent(entry: KlingonContentProvider.Entry) {
-        if (entry.isAlternativeSpelling) {
+        if (entry.isAlternativeSpelling()) {
             // Disable sharing alternative spelling entries.
             mShareEntryIntent = null
             return
@@ -286,7 +286,7 @@ class EntryActivity : BaseActivity(),
                         // The TTS engine is working, and there's something to say, say it.
                         // Log.d(TAG, "Speaking")
                         // Toast.makeText(getBaseContext(), mEntry.getEntryName(), Toast.LENGTH_LONG).show()
-                        mTts?.speak(it.entryName, TextToSpeech.QUEUE_FLUSH, null)
+                        mTts?.speak(it.getEntryName(), TextToSpeech.QUEUE_FLUSH, null)
                     }
                 }
                 return true
@@ -373,7 +373,7 @@ class EntryActivity : BaseActivity(),
             // Note: managedQuery is deprecated since API 11.
             val cursor = managedQuery(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)
             val entry = KlingonContentProvider.Entry(cursor, baseContext)
-            val entryId = entry.id
+            val entryId = entry.getId()
 
             // Update the entry (used for TTS output). This is also set in onCreate.
             mEntry = entry
@@ -475,22 +475,22 @@ class EntryActivity : BaseActivity(),
             fab.visibility = View.VISIBLE
             fab.setOnClickListener {
                 val definitionTranslation = when (editLang) {
-                    "de" -> mEntry?.definition_DE
-                    "fa" -> mEntry?.definition_FA
-                    "ru" -> mEntry?.definition_RU
-                    "sv" -> mEntry?.definition_SV
-                    "zh-HK" -> mEntry?.definition_ZH_HK
-                    "pt" -> mEntry?.definition_PT
-                    "fi" -> mEntry?.definition_FI
-                    "fr" -> mEntry?.definition_FR
+                    "de" -> mEntry?.getDefinition_DE()
+                    "fa" -> mEntry?.getDefinition_FA()
+                    "ru" -> mEntry?.getDefinition_RU()
+                    "sv" -> mEntry?.getDefinition_SV()
+                    "zh-HK" -> mEntry?.getDefinition_ZH_HK()
+                    "pt" -> mEntry?.getDefinition_PT()
+                    "fi" -> mEntry?.getDefinition_FI()
+                    "fr" -> mEntry?.getDefinition_FR()
                     else -> null
                 }
                 // Open a form with fields filled in.
                 val submitCorrectionTask = SubmitCorrectionTask()
                 submitCorrectionTask.execute(
-                    mEntry?.entryName,
-                    mEntry?.partOfSpeech,
-                    mEntry?.definition,
+                    mEntry?.getEntryName(),
+                    mEntry?.getPartOfSpeech(),
+                    mEntry?.getDefinition(),
                     editLang,
                     definitionTranslation?.replace(" [AUTOTRANSLATED]", "")
                 )

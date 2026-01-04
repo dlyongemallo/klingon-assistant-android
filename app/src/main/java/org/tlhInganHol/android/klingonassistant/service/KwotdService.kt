@@ -185,7 +185,7 @@ class KwotdService : JobService() {
                                 it.moveToPosition(i)
                                 val entry = KlingonContentProvider.Entry(it, this@KwotdService)
                                 // Compare the (English) definition to the KWOTD definition.
-                                if (entry.definition == eword) {
+                                if (entry.getDefinition() == eword) {
                                     matched = true
                                     break
                                 }
