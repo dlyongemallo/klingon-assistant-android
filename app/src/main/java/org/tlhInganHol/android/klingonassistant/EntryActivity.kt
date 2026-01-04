@@ -443,7 +443,7 @@ class EntryActivity : BaseActivity(),
             bottomNavView.findViewById<View>(R.id.action_next).visibility = View.VISIBLE
         }
 
-        bottomNavView.setOnNavigationItemSelectedListener { item ->
+        bottomNavView.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.action_previous -> goToPreviousEntry()
                 R.id.action_random -> goToRandomEntry()

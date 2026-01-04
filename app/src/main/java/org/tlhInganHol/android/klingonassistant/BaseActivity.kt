@@ -367,7 +367,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 spannableTitle.length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
-            val accent = resources.getColor(R.color.colorAccent)
+            val accent = ContextCompat.getColor(this, R.color.colorAccent)
             spannableTitle.setSpan(
                 ForegroundColorSpan(accent),
                 0,
