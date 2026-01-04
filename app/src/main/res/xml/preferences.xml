@@ -17,128 +17,132 @@
 */
 -->
 
-<PreferenceScreen
-        xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- TUTORIAL -->
     <!--
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/tutorial_preferences">
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="run_tutorial_checkbox_preference"
                 android:title="@string/run_tutorial_preference_title"
                 android:summary="@string/run_tutorial_preference_summary"
                 android:enabled="false"
                 android:defaultValue="true" />
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
     -->
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/language_preferences">
-        <ListPreference
+        <androidx.preference.ListPreference
                 android:key="klingon_font_list_preference"
                 android:title="@string/klingon_font_preference_title"
                 android:summary="@string/klingon_font_preference_summary"
                 android:defaultValue="LATIN"
                 android:entries="@array/klingonFontChoicesArray"
-                android:entryValues="@array/klingonFontChoicesValues" />
-        <CheckBoxPreference
+                android:entryValues="@array/klingonFontChoicesValues"
+                app:useSimpleSummaryProvider="false" />
+        <androidx.preference.CheckBoxPreference
                 android:key="klingon_ui_checkbox_preference"
                 android:title="@string/klingon_ui_preference_title"
                 android:summary="@string/klingon_ui_preference_summary"
                 android:defaultValue="false" />
 
-        <ListPreference
+        <androidx.preference.ListPreference
                 android:key="show_secondary_language_list_preference"
-                android:layout="?android:attr/preferenceLayoutChild"
+                app:isPreferenceVisible="true"
                 android:title="@string/show_secondary_language_preference_title"
                 android:summary="@string/show_secondary_language_preference_summary"
                 android:defaultValue="NONE"
                 android:entries="@array/secondaryLanguageChoicesArray"
-                android:entryValues="@array/secondaryLanguageChoicesValues" />
-    </PreferenceCategory>
+                android:entryValues="@array/secondaryLanguageChoicesValues"
+                app:useSimpleSummaryProvider="false" />
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/input_preferences">
 
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="xifan_hol_checkbox_preference"
                 android:title="@string/xifan_hol_preference_title"
                 android:summary="@string/xifan_hol_preference_summary"
                 android:defaultValue="false" />
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="swap_qs_checkbox_preference"
                 android:dependency="xifan_hol_checkbox_preference"
-                android:layout="?android:attr/preferenceLayoutChild"
+                app:isPreferenceVisible="true"
                 android:title="@string/swap_qs_preference_title"
                 android:summary="@string/swap_qs_preference_summary"
                 android:defaultValue="false" />
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
 
     <!--
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/social_preferences">
 
-        <ListPreference
+        <androidx.preference.ListPreference
                 android:key="social_network_list_preference"
                 android:title="@string/social_network_preference_title"
                 android:summary="@string/social_network_preference_summary"
                 android:entries="@array/social_network_entries"
                 android:entryValues="@array/social_network_entries_values"
-                android:defaultValue="gplus" />
-    </PreferenceCategory>
+                android:defaultValue="gplus"
+                app:useSimpleSummaryProvider="false" />
+    </androidx.preference.PreferenceCategory>
     -->
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/informational_preferences">
 
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="show_transitivity_checkbox_preference"
                 android:title="@string/show_transitivity_preference_title"
                 android:summary="@string/show_transitivity_preference_summary"
                 android:defaultValue="true" />
 
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="show_additional_information_checkbox_preference"
                 android:title="@string/show_additional_information_preference_title"
                 android:summary="@string/show_additional_information_preference_summary"
                 android:defaultValue="true" />
 
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="kwotd_checkbox_preference"
                 android:title="@string/kwotd_preference_title"
                 android:summary="@string/kwotd_preference_summary"
                 android:defaultValue="true" />
 
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="update_db_checkbox_preference"
                 android:title="@string/update_db_preference_title"
                 android:summary="@string/update_db_preference_summary"
                 android:defaultValue="true" />
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/under_construction_preferences">
 
-        <CheckBoxPreference
+        <androidx.preference.CheckBoxPreference
                 android:key="show_unsupported_features_checkbox_preference"
                 android:title="@string/show_unsupported_features_preference_title"
                 android:summary="@string/show_unsupported_features_preference_summary"
                 android:defaultValue="false" />
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
 
-    <PreferenceCategory
+    <androidx.preference.PreferenceCategory
             android:title="@string/changelog_preferences">
 
-        <Preference
+        <androidx.preference.Preference
                 android:key="data_changelog_button_preference"
                 android:title="@string/data_changelog_preference_title"
                 android:summary="@string/data_changelog_preference_summary" />
 
-        <Preference
+        <androidx.preference.Preference
                 android:key="code_changelog_button_preference"
                 android:title="@string/code_changelog_preference_title"
                 android:summary="@string/code_changelog_preference_summary" />
-    </PreferenceCategory>
+    </androidx.preference.PreferenceCategory>
 
-</PreferenceScreen>
+</androidx.preference.PreferenceScreen>

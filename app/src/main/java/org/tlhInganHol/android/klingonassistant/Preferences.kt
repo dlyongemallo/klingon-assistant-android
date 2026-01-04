@@ -21,24 +21,23 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import android.content.res.Configuration
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.preference.ListPreference
-import android.preference.Preference
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.text.style.TypefaceSpan
-import android.view.LayoutInflater
 import android.view.MenuItem
-import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import java.util.*
 
-class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListener {
+class Preferences : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,117 +45,39 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         // Restore system (non-Klingon) locale.
         restoreLocaleConfiguration()
 
-        // Set up the toolbar for an AppCompatPreferenceActivity.
-        setupActionBar()
+        setContentView(R.layout.activity_preferences)
 
-        // Load the preferences from an XML resource.
-        addPreferencesFromResource(R.xml.preferences)
+        // Set up the toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        // Get a reference to the {pIqaD} list preference, and apply the display option to it.
-        val klingonFontListPreference =
-            preferenceScreen.findPreference(KEY_KLINGON_FONT_LIST_PREFERENCE) as ListPreference
-        val title = klingonFontListPreference.title.toString()
-        val ssb: SpannableString
-        if (!useKlingonFont(baseContext)) {
-            // Display in bold serif.
-            ssb = SpannableString(title)
-            ssb.setSpan(
-                StyleSpan(Typeface.BOLD),
-                0,
-                ssb.length,
-                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE or Spanned.SPAN_INTERMEDIATE
-            )
-            ssb.setSpan(TypefaceSpan("serif"), 0, ssb.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        } else {
-            val klingonTitle = KlingonContentProvider.convertStringToKlingonFont(title)
-            ssb = SpannableString(klingonTitle)
-            val klingonTypeface = KlingonAssistant.getKlingonFontTypeface(baseContext)
-            ssb.setSpan(
-                KlingonTypefaceSpan("", klingonTypeface),
-                0,
-                ssb.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+        // Load the preferences fragment
+        if (savedInstanceState == null) {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.preferences_container, PreferencesFragment())
+                .commit()
         }
-        klingonFontListPreference.title = ssb
-
-        // TODO: Expand the language list to include incomplete languages if unsupported features is
-        // selected. Switch to English if unsupported features has been deselected and an incomplete
-        // language has been selected. Enable or disable the search in secondary language checkbox.
-        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
-        val sharedPrefsEd = sharedPrefs.edit()
-
-        // Support the legacy German options.
-        val showGerman = sharedPrefs.getBoolean(
-            KEY_SHOW_GERMAN_DEFINITIONS_CHECKBOX_PREFERENCE, /* default */ false
-        )
-        if (showGerman) {
-            // Copy to the new settings.
-            sharedPrefsEd.putString(KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, "de")
-
-            // Clear the legacy settings.
-            sharedPrefsEd.putBoolean(KEY_SHOW_GERMAN_DEFINITIONS_CHECKBOX_PREFERENCE, false)
-            sharedPrefsEd.putBoolean(KEY_SEARCH_GERMAN_DEFINITIONS_CHECKBOX_PREFERENCE, false)
-
-            sharedPrefsEd.putBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, true)
-            sharedPrefsEd.apply()
-        }
-
-        // Set the defaults for the other-language options based on the user's language, if it hasn't
-        // been already set.
-        if (!sharedPrefs.getBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, /* default */ false)) {
-            val mShowOtherLanguageListPreference =
-                preferenceScreen.findPreference(KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE) as ListPreference
-            mShowOtherLanguageListPreference.value = getSystemPreferredLanguage()
-
-            sharedPrefsEd.putBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, true)
-            sharedPrefsEd.apply()
-        }
-
-        val dataChangelogButtonPreference =
-            preferenceScreen.findPreference(KEY_DATA_CHANGELOG_BUTTON_PREFERENCE)
-        dataChangelogButtonPreference.onPreferenceClickListener =
-            Preference.OnPreferenceClickListener {
-                val installedVersion = sharedPrefs.getString(
-                    KlingonContentDatabase.KEY_INSTALLED_DATABASE_VERSION,
-                    /* default */ KlingonContentDatabase.getBundledDatabaseVersion()
-                )
-                launchExternal(
-                    "https://github.com/De7vID/klingon-assistant-data/commits/master@{$installedVersion}"
-                )
-                true
-            }
-
-        val codeChangelogButtonPreference =
-            preferenceScreen.findPreference(KEY_CODE_CHANGELOG_BUTTON_PREFERENCE)
-        codeChangelogButtonPreference.onPreferenceClickListener =
-            Preference.OnPreferenceClickListener {
-                // The bundled database version is the app's built date.
-                launchExternal(
-                    "https://github.com/De7vID/klingon-assistant-android/commits/master@{${KlingonContentDatabase.getBundledDatabaseVersion()}}"
-                )
-                true
-            }
     }
 
     private fun restoreLocaleConfiguration() {
         // Always restore system (non-Klingon) locale here.
         val locale = KlingonAssistant.getSystemLocale()
-        val configuration = baseContext.resources.configuration
-        configuration.locale = locale
-        baseContext.resources.updateConfiguration(
-            configuration,
-            baseContext.resources.displayMetrics
-        )
-    }
-
-    private fun setupActionBar() {
-        // This only works in ICS (API 14) and up.
-        val root = findViewById<ViewGroup>(android.R.id.list).parent.parent.parent as ViewGroup
-        val toolbar = LayoutInflater.from(this).inflate(R.layout.view_toolbar, root, false) as Toolbar
-        root.addView(toolbar, 0)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            val configuration = android.content.res.Configuration(baseContext.resources.configuration)
+            configuration.setLocale(locale)
+            baseContext.createConfigurationContext(configuration)
+        } else {
+            val configuration = baseContext.resources.configuration
+            @Suppress("DEPRECATION")
+            configuration.locale = locale
+            @Suppress("DEPRECATION")
+            baseContext.resources.updateConfiguration(
+                configuration,
+                baseContext.resources.displayMetrics
+            )
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -169,48 +90,149 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         }
     }
 
-    override fun onResume() {
-        super.onResume()
+    class PreferencesFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener {
 
-        // Restore system (non-Klingon) locale.
-        restoreLocaleConfiguration()
+        override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+            // Load the preferences from an XML resource.
+            setPreferencesFromResourceId(R.xml.preferences, rootKey)
 
-        // Set up a listener whenever a key changes.
-        preferenceScreen.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        // Unregister the listener whenever a key changes.
-        preferenceScreen.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
-    }
-
-    override fun onSharedPreferenceChanged(sharedPrefs: SharedPreferences?, key: String?) {
-        if (key != null && (key == KEY_KLINGON_FONT_LIST_PREFERENCE || key == KEY_KLINGON_UI_CHECKBOX_PREFERENCE)) {
-            // User has changed the Klingon font option or UI language, display a warning.
-            AlertDialog.Builder(this)
-                .setIcon(R.drawable.alert_dialog_icon)
-                .setTitle(R.string.warning)
-                .setMessage(R.string.change_ui_language_warning)
-                .setCancelable(false) // Can't be canceled with the BACK key.
-                .setPositiveButton(android.R.string.yes) { _, _ ->
-                    // Since the display options have changed, everything needs to be redrawn.
-                    recreate()
+            // Get a reference to the {pIqaD} list preference, and apply the display option to it.
+            val klingonFontListPreference =
+                findPreference<ListPreference>(KEY_KLINGON_FONT_LIST_PREFERENCE)
+            klingonFontListPreference?.let { preference ->
+                val title = preference.title.toString()
+                val ssb: SpannableString
+                if (!useKlingonFont(requireContext())) {
+                    // Display in bold serif.
+                    ssb = SpannableString(title)
+                    ssb.setSpan(
+                        StyleSpan(Typeface.BOLD),
+                        0,
+                        ssb.length,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE or Spanned.SPAN_INTERMEDIATE
+                    )
+                    ssb.setSpan(TypefaceSpan("serif"), 0, ssb.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                } else {
+                    val klingonTitle = KlingonContentProvider.convertStringToKlingonFont(title)
+                    ssb = SpannableString(klingonTitle)
+                    val klingonTypeface = KlingonAssistant.getKlingonFontTypeface(requireContext())
+                    ssb.setSpan(
+                        KlingonTypefaceSpan("", klingonTypeface),
+                        0,
+                        ssb.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                 }
-                .show()
-        }
-        // TODO: React to unsupported features and secondary language options changes here.
-    }
+                preference.title = ssb
+            }
 
-    // Method to launch an external app or web site.
-    // See identical method in BaseActivity.
-    private fun launchExternal(externalUrl: String) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        // Set NEW_TASK so the external app or web site is independent.
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        intent.data = Uri.parse(externalUrl)
-        startActivity(intent)
+            // TODO: Expand the language list to include incomplete languages if unsupported features is
+            // selected. Switch to English if unsupported features has been deselected and an incomplete
+            // language has been selected. Enable or disable the search in secondary language checkbox.
+            val sharedPrefs = requireContext().getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
+            val sharedPrefsEd = sharedPrefs.edit()
+
+            // Support the legacy German options.
+            val showGerman = sharedPrefs.getBoolean(
+                KEY_SHOW_GERMAN_DEFINITIONS_CHECKBOX_PREFERENCE, /* default */ false
+            )
+            if (showGerman) {
+                // Copy to the new settings.
+                sharedPrefsEd.putString(KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, "de")
+
+                // Clear the legacy settings.
+                sharedPrefsEd.putBoolean(KEY_SHOW_GERMAN_DEFINITIONS_CHECKBOX_PREFERENCE, false)
+                sharedPrefsEd.putBoolean(KEY_SEARCH_GERMAN_DEFINITIONS_CHECKBOX_PREFERENCE, false)
+
+                sharedPrefsEd.putBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, true)
+                sharedPrefsEd.apply()
+            }
+
+            // Set the defaults for the other-language options based on the user's language, if it hasn't
+            // been already set.
+            if (!sharedPrefs.getBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, /* default */ false)) {
+                val mShowOtherLanguageListPreference =
+                    findPreference<ListPreference>(KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE)
+                mShowOtherLanguageListPreference?.value = getSystemPreferredLanguage()
+
+                sharedPrefsEd.putBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, true)
+                sharedPrefsEd.apply()
+            }
+
+            val dataChangelogButtonPreference =
+                findPreference<Preference>(KEY_DATA_CHANGELOG_BUTTON_PREFERENCE)
+            dataChangelogButtonPreference?.onPreferenceClickListener =
+                Preference.OnPreferenceClickListener {
+                    val installedVersion = sharedPrefs.getString(
+                        KlingonContentDatabase.KEY_INSTALLED_DATABASE_VERSION,
+                        /* default */ KlingonContentDatabase.getBundledDatabaseVersion()
+                    )
+                    launchExternal(
+                        "https://github.com/De7vID/klingon-assistant-data/commits/master@{$installedVersion}"
+                    )
+                    true
+                }
+
+            val codeChangelogButtonPreference =
+                findPreference<Preference>(KEY_CODE_CHANGELOG_BUTTON_PREFERENCE)
+            codeChangelogButtonPreference?.onPreferenceClickListener =
+                Preference.OnPreferenceClickListener {
+                    // The bundled database version is the app's built date.
+                    launchExternal(
+                        "https://github.com/De7vID/klingon-assistant-android/commits/master@{${KlingonContentDatabase.getBundledDatabaseVersion()}}"
+                    )
+                    true
+                }
+        }
+
+        override fun onResume() {
+            super.onResume()
+
+            // Restore system (non-Klingon) locale.
+            (activity as? Preferences)?.restoreLocaleConfiguration()
+
+            // Set up a listener whenever a key changes.
+            preferenceScreen.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+        }
+
+        override fun onPause() {
+            super.onPause()
+
+            // Unregister the listener whenever a key changes.
+            preferenceScreen.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
+        }
+
+        override fun onSharedPreferenceChanged(sharedPrefs: SharedPreferences?, key: String?) {
+            if (key != null && (key == KEY_KLINGON_FONT_LIST_PREFERENCE || key == KEY_KLINGON_UI_CHECKBOX_PREFERENCE)) {
+                // User has changed the Klingon font option or UI language, display a warning.
+                AlertDialog.Builder(requireContext())
+                    .setIcon(R.drawable.alert_dialog_icon)
+                    .setTitle(R.string.warning)
+                    .setMessage(R.string.change_ui_language_warning)
+                    .setCancelable(false) // Can't be canceled with the BACK key.
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        // Since the display options have changed, everything needs to be redrawn.
+                        activity?.recreate()
+                    }
+                    .show()
+            }
+            // TODO: React to unsupported features and secondary language options changes here.
+        }
+
+        // Method to launch an external app or web site.
+        // See identical method in BaseActivity.
+        private fun launchExternal(externalUrl: String) {
+            val intent = Intent(Intent.ACTION_VIEW)
+            // Set NEW_TASK so the external app or web site is independent.
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            intent.data = Uri.parse(externalUrl)
+            startActivity(intent)
+        }
+
+        // Helper method to set preferences from resource with proper type handling
+        private fun setPreferencesFromResourceId(preferencesResId: Int, key: String?) {
+            setPreferencesFromResource(preferencesResId, key)
+        }
     }
 
     companion object {

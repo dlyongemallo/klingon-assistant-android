@@ -39,7 +39,6 @@ import android.widget.AdapterView
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.TextView
-import android.widget.TwoLineListItem
 import java.util.*
 
 /**
@@ -213,28 +212,33 @@ class KlingonAssistant : BaseActivity() {
         override fun getItemId(position: Int): Long = position.toLong()
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val view = (convertView as? TwoLineListItem) ?: createView(parent)
+            val view = convertView ?: createView(parent)
             mCursor.moveToPosition(position)
             bindView(view, mCursor)
             return view
         }
 
-        private fun createView(parent: ViewGroup): TwoLineListItem {
+        private fun createView(parent: ViewGroup): View {
             val item = mInflater.inflate(
-                android.R.layout.simple_list_item_2,
+                R.layout.two_line_list_item,
                 parent,
                 false
-            ) as TwoLineListItem
+            )
 
             // Set single line to true if you want shorter definitions.
-            item.text2.setSingleLine(false)
-            item.text2.ellipsize = TextUtils.TruncateAt.END
+            val text2 = item.findViewById<TextView>(android.R.id.text2)
+            text2.setSingleLine(false)
+            text2.ellipsize = TextUtils.TruncateAt.END
 
             return item
         }
 
-        private fun bindView(view: TwoLineListItem, cursor: Cursor) {
+        private fun bindView(view: View, cursor: Cursor) {
             val entry = KlingonContentProvider.Entry(cursor, baseContext)
+
+            // Get references to the TextViews
+            val text1 = view.findViewById<TextView>(android.R.id.text1)
+            val text2 = view.findViewById<TextView>(android.R.id.text2)
 
             // Note that we override the typeface and text size here, instead of in
             // the xml, because putting it there would also change the appearance of
@@ -248,23 +252,23 @@ class KlingonAssistant : BaseActivity() {
 
             if (Preferences.useKlingonFont(baseContext)) {
                 // Preference is set to display this in {pIqaD}!
-                view.text1.text = SpannableStringBuilder(HtmlCompat.fromHtml(indent1, HtmlCompat.FROM_HTML_MODE_LEGACY))
+                text1.text = SpannableStringBuilder(HtmlCompat.fromHtml(indent1, HtmlCompat.FROM_HTML_MODE_LEGACY))
                     .append(entry.getFormattedEntryNameInKlingonFont())
             } else {
                 // Use serif for the entry, so capital-I and lowercase-l are distinguishable.
-                view.text1.typeface = Typeface.SERIF
-                view.text1.text = HtmlCompat.fromHtml(indent1 + entry.getFormattedEntryName(/* isHtml */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
+                text1.typeface = Typeface.SERIF
+                text1.text = HtmlCompat.fromHtml(indent1 + entry.getFormattedEntryName(/* isHtml */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
             }
-            view.text1.textSize = 22f
+            text1.textSize = 22f
 
             // TODO: Colour attached affixes differently from verb.
-            view.text1.setTextColor(entry.getTextColor())
+            text1.setTextColor(entry.getTextColor())
 
             // Use sans serif for the definition.
-            view.text2.typeface = Typeface.SANS_SERIF
-            view.text2.text = HtmlCompat.fromHtml(indent2 + entry.getFormattedDefinition(/* isHtml */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
-            view.text2.textSize = 14f
-            view.text2.setTextColor(0xFFC0C0C0.toInt())
+            text2.typeface = Typeface.SANS_SERIF
+            text2.text = HtmlCompat.fromHtml(indent2 + entry.getFormattedDefinition(/* isHtml */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
+            text2.textSize = 14f
+            text2.setTextColor(0xFFC0C0C0.toInt())
         }
 
         override fun onItemClick(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
