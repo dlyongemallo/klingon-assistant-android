@@ -27,7 +27,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.preference.ListPreference
 import android.preference.Preference
-import android.preference.PreferenceManager
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -84,7 +83,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         // TODO: Expand the language list to include incomplete languages if unsupported features is
         // selected. Switch to English if unsupported features has been deselected and an incomplete
         // language has been selected. Enable or disable the search in secondary language checkbox.
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         val sharedPrefsEd = sharedPrefs.edit()
 
         // Support the legacy German options.
@@ -271,7 +270,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
 
         @JvmStatic
         fun setDefaultSecondaryLanguage(context: Context) {
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val sharedPrefs = context.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             if (!sharedPrefs.getBoolean(KEY_LANGUAGE_DEFAULT_ALREADY_SET, /* default */ false)) {
                 val sharedPrefsEd = sharedPrefs.edit()
                 sharedPrefsEd.putString(
@@ -286,7 +285,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         // Whether the UI (menus, hints, etc.) should be displayed in Klingon.
         @JvmStatic
         fun useKlingonUI(context: Context): Boolean {
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val sharedPrefs = context.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             return sharedPrefs.getBoolean(
                 KEY_KLINGON_UI_CHECKBOX_PREFERENCE, /* default */ false
             )
@@ -295,7 +294,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         // Whether a Klingon font should be used when display Klingon text.
         @JvmStatic
         fun useKlingonFont(context: Context): Boolean {
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val sharedPrefs = context.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             val value = sharedPrefs.getString(KEY_KLINGON_FONT_LIST_PREFERENCE, /* default */ "LATIN")
             return value == "TNG" || value == "DSC" || value == "CORE"
         }
@@ -303,7 +302,7 @@ class Preferences : AppCompatPreferenceActivity(), OnSharedPreferenceChangeListe
         // Returns which font should be used for Klingon: returns one of "LATIN", "TNG", "DSC", or "CORE".
         @JvmStatic
         fun getKlingonFontCode(context: Context): String {
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val sharedPrefs = context.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             return sharedPrefs.getString(KEY_KLINGON_FONT_LIST_PREFERENCE, /* default */ "LATIN")
                 ?: "LATIN"
         }

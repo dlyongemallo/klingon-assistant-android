@@ -20,9 +20,8 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.text.Html
 import android.text.SpannableStringBuilder
+import androidx.core.text.HtmlCompat
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
@@ -56,8 +55,7 @@ class EntryFragment : Fragment() {
         val uri = Uri.parse(requireArguments().getString("uri"))
 
         // Retrieve the entry's data.
-        // Note: managedQuery is deprecated since API 11.
-        val cursor = requireActivity().managedQuery(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)
+        val cursor = requireActivity().contentResolver.query(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)!!
         val entry = KlingonContentProvider.Entry(cursor, requireActivity().baseContext)
 
         // Handle alternative spellings here.
@@ -66,7 +64,7 @@ class EntryFragment : Fragment() {
         }
 
         // Get the shared preferences.
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(requireActivity().baseContext)
+        val sharedPrefs = requireActivity().baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", android.content.Context.MODE_PRIVATE)
 
         // Set the entry's name (along with info like "slang", formatted in HTML).
         entryTitle.invalidate()
@@ -76,7 +74,7 @@ class EntryFragment : Fragment() {
             entryTitle.text = entry.getFormattedEntryNameInKlingonFont()
         } else {
             // Boring transcription based on English (Latin) alphabet.
-            entryTitle.text = Html.fromHtml(entry.getFormattedEntryName(/* isHtml = */ true))
+            entryTitle.text = HtmlCompat.fromHtml(entry.getFormattedEntryName(/* isHtml = */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
         }
         mEntryName = entry.getEntryName()
 

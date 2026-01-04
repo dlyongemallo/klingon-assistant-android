@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 /*
  * Copyright (C) 2017 De'vID jonpIn (David Yonge-Mallo)
  *
@@ -21,7 +23,6 @@ import android.app.job.JobService
 import android.content.SharedPreferences
 import android.content.res.Resources
 import android.os.AsyncTask
-import android.preference.PreferenceManager
 import android.util.Log
 import org.json.JSONObject
 import org.tlhInganHol.android.klingonassistant.KlingonContentDatabase
@@ -73,7 +74,7 @@ class UpdateDatabaseService : JobService() {
     private inner class UpdateDatabaseTask : AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this@UpdateDatabaseService)
+            val sharedPrefs = this@UpdateDatabaseService.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", android.content.Context.MODE_PRIVATE)
 
             // Set to false if job runs successfully to completion.
             var rescheduleJob = true
@@ -117,7 +118,7 @@ class UpdateDatabaseService : JobService() {
                         copyDBFromZipUrl(databaseZipUrl)
 
                         // Save the new version and first extra entry ID.
-                        val sharedPrefsEd = PreferenceManager.getDefaultSharedPreferences(this@UpdateDatabaseService).edit()
+                        val sharedPrefsEd = this@UpdateDatabaseService.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", android.content.Context.MODE_PRIVATE).edit()
                         sharedPrefsEd.putString(KlingonContentDatabase.KEY_UPDATED_DATABASE_VERSION, latest)
                         sharedPrefsEd.putInt(
                             KlingonContentDatabase.KEY_UPDATED_ID_OF_FIRST_EXTRA_ENTRY,

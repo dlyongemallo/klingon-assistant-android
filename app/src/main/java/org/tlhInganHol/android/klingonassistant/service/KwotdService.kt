@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 /*
  * Copyright (C) 2017 De'vID jonpIn (David Yonge-Mallo)
  *
@@ -33,9 +35,8 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Build
-import android.preference.PreferenceManager
-import android.text.Html
 import android.text.SpannableStringBuilder
+import androidx.core.text.HtmlCompat
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.text.style.TypefaceSpan
@@ -98,7 +99,7 @@ class KwotdService : JobService() {
             if (!isOneOffJob) {
                 // If this is not a one-off job, then retrieve the previously fetched
                 // data for comparison to the newly fetched data.
-                val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this@KwotdService)
+                val sharedPrefs = this@KwotdService.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", android.content.Context.MODE_PRIVATE)
                 kwotdData = sharedPrefs.getString(KEY_KWORD_DATA, /* default */ null)
             }
 
@@ -126,7 +127,7 @@ class KwotdService : JobService() {
                     } else {
                         // Save the data.
                         Log.d(TAG, "Saving KWOTD data.")
-                        val sharedPrefsEd = PreferenceManager.getDefaultSharedPreferences(this@KwotdService).edit()
+                        val sharedPrefsEd = this@KwotdService.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", android.content.Context.MODE_PRIVATE).edit()
                         sharedPrefsEd.putString(KEY_KWORD_DATA, data.replace("\n", ""))
                         sharedPrefsEd.apply()
                     }
@@ -222,7 +223,7 @@ class KwotdService : JobService() {
                         val formattedDefinition = entry.getFormattedDefinition(/* html */ true)
 
                         // Create a notification.
-                        val notificationTitle = SpannableStringBuilder(Html.fromHtml(formattedEntryName))
+                        val notificationTitle = SpannableStringBuilder(HtmlCompat.fromHtml(formattedEntryName, HtmlCompat.FROM_HTML_MODE_LEGACY))
                         notificationTitle.setSpan(
                             StyleSpan(Typeface.BOLD),
                             0,
@@ -236,10 +237,11 @@ class KwotdService : JobService() {
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
 
-                        val notificationText = SpannableStringBuilder(Html.fromHtml(formattedDefinition))
+                        val notificationText = SpannableStringBuilder(HtmlCompat.fromHtml(formattedDefinition, HtmlCompat.FROM_HTML_MODE_LEGACY))
                         val notificationTextLong = SpannableStringBuilder(
-                            Html.fromHtml(
-                                formattedDefinition + "<br/><br/>" + resources.getString(R.string.kwotd_footer)
+                            HtmlCompat.fromHtml(
+                                formattedDefinition + "<br/><br/>" + resources.getString(R.string.kwotd_footer),
+                                HtmlCompat.FROM_HTML_MODE_LEGACY
                             )
                         )
 

@@ -28,9 +28,8 @@ import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.text.Html
 import android.text.SpannableStringBuilder
+import androidx.core.text.HtmlCompat
 import android.text.TextUtils
 import android.util.Log
 import android.view.LayoutInflater
@@ -249,12 +248,12 @@ class KlingonAssistant : BaseActivity() {
 
             if (Preferences.useKlingonFont(baseContext)) {
                 // Preference is set to display this in {pIqaD}!
-                view.text1.text = SpannableStringBuilder(Html.fromHtml(indent1))
+                view.text1.text = SpannableStringBuilder(HtmlCompat.fromHtml(indent1, HtmlCompat.FROM_HTML_MODE_LEGACY))
                     .append(entry.getFormattedEntryNameInKlingonFont())
             } else {
                 // Use serif for the entry, so capital-I and lowercase-l are distinguishable.
                 view.text1.typeface = Typeface.SERIF
-                view.text1.text = Html.fromHtml(indent1 + entry.getFormattedEntryName(/* isHtml */ true))
+                view.text1.text = HtmlCompat.fromHtml(indent1 + entry.getFormattedEntryName(/* isHtml */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
             }
             view.text1.textSize = 22f
 
@@ -263,7 +262,7 @@ class KlingonAssistant : BaseActivity() {
 
             // Use sans serif for the definition.
             view.text2.typeface = Typeface.SANS_SERIF
-            view.text2.text = Html.fromHtml(indent2 + entry.getFormattedDefinition(/* isHtml */ true))
+            view.text2.text = HtmlCompat.fromHtml(indent2 + entry.getFormattedDefinition(/* isHtml */ true), HtmlCompat.FROM_HTML_MODE_LEGACY)
             view.text2.textSize = 14f
             view.text2.setTextColor(0xFFC0C0C0.toInt())
         }
@@ -297,9 +296,7 @@ class KlingonAssistant : BaseActivity() {
      * @param query The search query
      */
     private fun showResults(query: String) {
-        // Note: managedQuery is deprecated since API 11.
-        @Suppress("DEPRECATION")
-        val cursor = managedQuery(
+        val cursor = contentResolver.query(
             Uri.parse("${KlingonContentProvider.CONTENT_URI}/lookup"),
             null /* all columns */,
             null,
@@ -308,11 +305,11 @@ class KlingonAssistant : BaseActivity() {
         )
 
         // A query may be preceded by a plus to override (disable) "xifan hol" mode. This is used
-        // for internal searches. After it is passed to managedQuery (above), it can be removed.
+        // for internal searches. After it is passed to contentResolver.query (above), it can be removed.
         val overrideXifanHol = query.isNotEmpty() && query[0] == '+'
         val cleanQuery = if (overrideXifanHol) query.substring(1) else query
 
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         val queryEntry = KlingonContentProvider.Entry(cleanQuery, baseContext)
         val qWillBeRemapped = queryEntry.getEntryName().contains('q') &&
                 sharedPrefs.getBoolean(Preferences.KEY_XIFAN_HOL_CHECKBOX_PREFERENCE, /* default */ false) &&
@@ -328,7 +325,7 @@ class KlingonAssistant : BaseActivity() {
 
         if (cursor == null || cursor.count == 0) {
             // There are no results.
-            mTextView.text = Html.fromHtml(getString(R.string.no_results, entryNameWithPoS))
+            mTextView.text = HtmlCompat.fromHtml(getString(R.string.no_results, entryNameWithPoS), HtmlCompat.FROM_HTML_MODE_LEGACY)
             // The user probably made a typo, so allow them to edit the query.
             mPrepopulatedQuery = queryEntry.getEntryName()
         } else {
@@ -363,7 +360,7 @@ class KlingonAssistant : BaseActivity() {
                     mPrepopulatedQuery = "+$mPrepopulatedQuery"
                 }
             }
-            mTextView.text = Html.fromHtml(countString)
+            mTextView.text = HtmlCompat.fromHtml(countString, HtmlCompat.FROM_HTML_MODE_LEGACY)
 
             // TODO: Allow TTS to speak queryEntry.getEntryName().
 

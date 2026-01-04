@@ -28,11 +28,11 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Typeface
 import android.net.ConnectivityManager
-import android.net.NetworkInfo
+import android.net.NetworkCapabilities
+import android.os.Build
 import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
-import android.preference.PreferenceManager
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
@@ -92,9 +92,9 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             } else {
                 // The user has denied notifications permission, so turn off KWOTD if it is on, and
                 // inform the user.
-                val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+                val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
                 if (sharedPrefs.getBoolean(Preferences.KEY_KWOTD_CHECKBOX_PREFERENCE, /* default */ true)) {
-                    val sharedPrefsEd = PreferenceManager.getDefaultSharedPreferences(baseContext).edit()
+                    val sharedPrefsEd = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE).edit()
                     sharedPrefsEd.putBoolean(Preferences.KEY_KWOTD_CHECKBOX_PREFERENCE, false)
                     sharedPrefsEd.apply()
 
@@ -154,7 +154,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
         supportActionBar?.title = klingonAppName
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
 
         mDrawer = findViewById(R.id.drawer_layout)
         mDrawer?.let { drawer ->
@@ -165,7 +165,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close
             )
-            drawer.setDrawerListener(toggle)
+            drawer.addDrawerListener(toggle)
             toggle.syncState()
         }
 
@@ -241,7 +241,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         // Schedule the KWOTD service if it hasn't already been started. It's necessary to do this here
         // because the setting might have changed in Preferences. Note that we don't request permission
         // here because the preference should already be set by the call in onCreate().
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         if (sharedPrefs.getBoolean(Preferences.KEY_KWOTD_CHECKBOX_PREFERENCE, /* default */ true)) {
             runKwotdServiceJob(isOneOffJob = false)
         } else {
@@ -298,11 +298,8 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             KlingonAssistant.getSystemLocale()
         }
         val configuration = baseContext.resources.configuration
-        configuration.locale = locale
-        baseContext.resources.updateConfiguration(
-            configuration,
-            baseContext.resources.displayMetrics
-        )
+        configuration.setLocale(locale)
+        baseContext.createConfigurationContext(configuration)
     }
 
     private fun applyTypefaceToMenuItem(menuItem: MenuItem, enlarge: Boolean) {
@@ -387,7 +384,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
         }
 
         // Show normally-hidden menu items if "unsupported features" option is selected.
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         if (sharedPrefs.getBoolean(
                 Preferences.KEY_SHOW_UNSUPPORTED_FEATURES_CHECKBOX_PREFERENCE,
                 /* default */ false
@@ -534,25 +531,25 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
 
     // Protected method to display the "help" entries.
     protected fun displayHelp(helpQuery: String) {
-        // Note: managedQuery is deprecated since API 11.
-        val cursor = managedQuery(
+        contentResolver.query(
             Uri.parse("${KlingonContentProvider.CONTENT_URI}/lookup"),
             null /* all columns */,
             null,
             arrayOf(helpQuery),
             null
-        )
-        // Assume cursor.getCount() == 1.
-        val uri = Uri.parse(
-            "${KlingonContentProvider.CONTENT_URI}/get_entry_by_id/${cursor.getString(KlingonContentDatabase.COLUMN_ID)}"
-        )
+        )?.use { cursor ->
+            // Assume cursor.getCount() == 1.
+            val uri = Uri.parse(
+                "${KlingonContentProvider.CONTENT_URI}/get_entry_by_id/${cursor.getString(KlingonContentDatabase.COLUMN_ID)}"
+            )
 
-        val entryIntent = Intent(this, EntryActivity::class.java)
+            val entryIntent = Intent(this, EntryActivity::class.java)
 
-        // Form the URI for the entry.
-        entryIntent.data = uri
+            // Form the URI for the entry.
+            entryIntent.data = uri
 
-        startActivity(entryIntent)
+            startActivity(entryIntent)
+        }
     }
 
     // Protected method to display the prefix chart.
@@ -659,8 +656,15 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             if (isOneOffJob) {
                 // A one-off request to the KWOTD server needs Internet access.
                 val cm = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val activeNetwork = cm.activeNetworkInfo
-                if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting) {
+                val isConnected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val network = cm.activeNetwork
+                    val capabilities = cm.getNetworkCapabilities(network)
+                    capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+                } else {
+                    @Suppress("DEPRECATION")
+                    cm.activeNetworkInfo?.isConnectedOrConnecting == true
+                }
+                if (!isConnected) {
                     // Inform the user the fetch will happen when there is an Internet connection.
                     Toast.makeText(
                         this,
@@ -735,8 +739,15 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             if (isOneOffJob) {
                 // A one-off request to the update database server needs Internet access.
                 val cm = baseContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-                val activeNetwork = cm.activeNetworkInfo
-                if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting) {
+                val isConnected = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    val network = cm.activeNetwork
+                    val capabilities = cm.getNetworkCapabilities(network)
+                    capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+                } else {
+                    @Suppress("DEPRECATION")
+                    cm.activeNetworkInfo?.isConnectedOrConnecting == true
+                }
+                if (!isConnected) {
                     // Inform the user the fetch will happen when there is an Internet connection.
                     Toast.makeText(
                         this,
@@ -779,10 +790,12 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
     }
 
     // Collapse slide-out menu if "Back" key is pressed and it's open.
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (mDrawer != null && mDrawer!!.isDrawerOpen(GravityCompat.START)) {
             mDrawer!!.closeDrawer(GravityCompat.START)
         } else {
+            @Suppress("DEPRECATION")
             super.onBackPressed()
         }
     }

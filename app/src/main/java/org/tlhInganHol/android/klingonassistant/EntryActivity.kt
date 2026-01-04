@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 /*
  * Copyright (C) 2014 De'vID jonpIn (David Yonge-Mallo)
  *
@@ -24,7 +26,6 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import android.view.Menu
@@ -132,8 +133,7 @@ class EntryActivity : BaseActivity(),
         }
 
         // Retrieve the entry's data.
-        // Note: managedQuery is deprecated since API 11.
-        val cursor = managedQuery(queryUri, KlingonContentDatabase.ALL_KEYS, null, null, null)
+        val cursor = contentResolver.query(queryUri, KlingonContentDatabase.ALL_KEYS, null, null, null)!!
         val entry = KlingonContentProvider.Entry(cursor, baseContext)
         val entryId = entry.getId()
 
@@ -263,7 +263,9 @@ class EntryActivity : BaseActivity(),
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
+        @Suppress("DEPRECATION")
         super.onBackPressed()
     }
 
@@ -286,7 +288,7 @@ class EntryActivity : BaseActivity(),
                         // The TTS engine is working, and there's something to say, say it.
                         // Log.d(TAG, "Speaking")
                         // Toast.makeText(getBaseContext(), mEntry.getEntryName(), Toast.LENGTH_LONG).show()
-                        mTts?.speak(it.getEntryName(), TextToSpeech.QUEUE_FLUSH, null)
+                        mTts?.speak(it.getEntryName(), TextToSpeech.QUEUE_FLUSH, null, null)
                     }
                 }
                 return true
@@ -337,7 +339,7 @@ class EntryActivity : BaseActivity(),
     private inner class SwipeAdapter(
         fm: FragmentManager,
         entryIdsList: List<String>
-    ) : FragmentStatePagerAdapter(fm) {
+    ) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
         private val entryFragments: List<EntryFragment>
 
         init {
@@ -370,8 +372,7 @@ class EntryActivity : BaseActivity(),
                 "${KlingonContentProvider.CONTENT_URI}/get_entry_by_id/${mEntryIdsList[position]}"
             )
 
-            // Note: managedQuery is deprecated since API 11.
-            val cursor = managedQuery(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)
+            val cursor = contentResolver.query(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)!!
             val entry = KlingonContentProvider.Entry(cursor, baseContext)
             val entryId = entry.getId()
 
@@ -455,7 +456,7 @@ class EntryActivity : BaseActivity(),
 
     private fun updateEditButton() {
         // Enable FAB if conditions are met:
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        val sharedPrefs = baseContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", android.content.Context.MODE_PRIVATE)
         val editLang = sharedPrefs.getString(
             Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */
             Preferences.getSystemPreferredLanguage()
@@ -487,6 +488,7 @@ class EntryActivity : BaseActivity(),
                 }
                 // Open a form with fields filled in.
                 val submitCorrectionTask = SubmitCorrectionTask()
+                @Suppress("DEPRECATION")
                 submitCorrectionTask.execute(
                     mEntry?.getEntryName(),
                     mEntry?.getPartOfSpeech(),
@@ -501,25 +503,26 @@ class EntryActivity : BaseActivity(),
     }
 
     private fun getEntryByIdIntent(entryId: Int): Intent? {
-        val cursor = managedQuery(
+        contentResolver.query(
             Uri.parse("${KlingonContentProvider.CONTENT_URI}/get_entry_by_id/$entryId"),
             null /* all columns */,
             null,
             null,
             null
-        )
-        if (cursor.count == 1) {
-            val uri = Uri.parse(
-                "${KlingonContentProvider.CONTENT_URI}/get_entry_by_id/${cursor.getString(KlingonContentDatabase.COLUMN_ID)}"
-            )
+        )?.use { cursor ->
+            if (cursor.count == 1) {
+                val uri = Uri.parse(
+                    "${KlingonContentProvider.CONTENT_URI}/get_entry_by_id/${cursor.getString(KlingonContentDatabase.COLUMN_ID)}"
+                )
 
-            val entryIntent = Intent(this, EntryActivity::class.java)
+                val entryIntent = Intent(this, EntryActivity::class.java)
 
-            // Form the URI for the entry.
-            entryIntent.action = Intent.ACTION_VIEW
-            entryIntent.data = uri
+                // Form the URI for the entry.
+                entryIntent.action = Intent.ACTION_VIEW
+                entryIntent.data = uri
 
-            return entryIntent
+                return entryIntent
+            }
         }
         return null
     }
@@ -545,6 +548,7 @@ class EntryActivity : BaseActivity(),
     }
 
     // Generate a Google Forms form for submitting corrections to non-English definitions.
+    @Suppress("DEPRECATION")
     private inner class SubmitCorrectionTask : AsyncTask<String, Void, Boolean>() {
 
         override fun doInBackground(vararg correction: String): Boolean {

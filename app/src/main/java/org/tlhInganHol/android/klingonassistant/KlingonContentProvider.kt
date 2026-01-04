@@ -28,7 +28,6 @@ import android.graphics.Typeface
 import android.database.Cursor
 import android.database.MatrixCursor
 import android.net.Uri
-import android.preference.PreferenceManager
 import android.provider.BaseColumns
 import android.text.SpannableStringBuilder
 import android.text.Spanned
@@ -1273,7 +1272,7 @@ class KlingonContentProvider : ContentProvider() {
     // TODO: Refactor the additional languages code to be much more compact.
     // These functions should probably take a language code as a second parameter.
     fun getOtherLanguageDefinition(): String {
-      val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+      val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
       val otherLang =
           sharedPrefs.getString(
               Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */ "NONE")
@@ -1320,7 +1319,7 @@ class KlingonContentProvider : ContentProvider() {
 
     // Returns true iff the other-language definition should displayed.
     fun shouldDisplayOtherLanguageDefinition(): Boolean {
-      val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+      val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
       val otherLang =
           sharedPrefs.getString(
               Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */
@@ -1342,7 +1341,7 @@ class KlingonContentProvider : ContentProvider() {
     // empty notes override the English notes), in which case this function will still return true.
     // It's up to the caller to "display" these empty notes (i.e., suppress the English notes).
     fun shouldDisplayOtherLanguageNotes(): Boolean {
-      val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+      val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
       val otherLang =
           sharedPrefs.getString(
               Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */
@@ -1361,7 +1360,7 @@ class KlingonContentProvider : ContentProvider() {
 
     // Returns true iff the other-language examples should be displayed.
     fun shouldDisplayOtherLanguageExamples(): Boolean {
-      val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+      val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
       val otherLang =
           sharedPrefs.getString(
               Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */
@@ -1562,7 +1561,7 @@ class KlingonContentProvider : ContentProvider() {
 
     // TODO: Refactor.
     fun getOtherLanguageNotes(): String {
-      val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+      val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
       val otherLang =
           sharedPrefs.getString(
               Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */ "NONE")
@@ -1613,7 +1612,7 @@ class KlingonContentProvider : ContentProvider() {
 
     // TODO: Refactor.
     fun getOtherLanguageExamples(): String {
-      val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+      val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
       val otherLang =
           sharedPrefs.getString(
               Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */ "NONE")

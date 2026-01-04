@@ -27,7 +27,6 @@ import android.database.sqlite.SQLiteDiskIOException
 import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
 import android.database.sqlite.SQLiteQueryBuilder
-import android.preference.PreferenceManager
 import android.provider.BaseColumns
 import android.util.Log
 import android.widget.Toast
@@ -106,7 +105,7 @@ class KlingonContentDatabase(context: Context) {
      * ch (but ch -/> chh) // g -> gh (but gh -/> ghh and ng -/> ngh)
      */
     private fun expandShorthand(shorthand: String): String {
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+        val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         if (!sharedPrefs.getBoolean(
                 Preferences.KEY_XIFAN_HOL_CHECKBOX_PREFERENCE, /* default */ false)) {
             // The user has disabled the "xifan hol" shorthand, so just do nothing and return.
@@ -298,7 +297,7 @@ class KlingonContentDatabase(context: Context) {
             // additionally search in other-language if that option is set. Limit to 3
             // characters as there would be too many coincidental hits otherwise, except
             // if other-language is Chinese.
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+            val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             val otherLang = sharedPrefs.getString(
                 Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */
                 Preferences.getSystemPreferredLanguage()
@@ -557,7 +556,7 @@ class KlingonContentDatabase(context: Context) {
     ): Cursor? {
 
         // The search key is either the definition or the search tags.
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+        val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         val otherLang = sharedPrefs.getString(
             Preferences.KEY_SHOW_SECONDARY_LANGUAGE_LIST_PREFERENCE, /* default */
             Preferences.getSystemPreferredLanguage()
@@ -960,7 +959,7 @@ class KlingonContentDatabase(context: Context) {
 
     /** Returns a cursor containing a random entry. */
     fun getRandomEntry(@Suppress("UNUSED_PARAMETER") columns: Array<String>?): Cursor? {
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
+        val sharedPrefs = mContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
         val onePastLastId =
             sharedPrefs.getInt(KEY_ID_OF_FIRST_EXTRA_ENTRY, /* default */ ID_OF_FIRST_EXTRA_ENTRY)
         val randomId = Random().nextInt(onePastLastId - ID_OF_FIRST_ENTRY) + ID_OF_FIRST_ENTRY
@@ -1046,7 +1045,7 @@ class KlingonContentDatabase(context: Context) {
             // updated database version B has been downloaded (but not installed), and this is the first
             // run of a new version bundled with database version C , the installedVersion should
             // default to A (not C).
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mHelperContext)
+            val sharedPrefs = mHelperContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             val installedVersion = sharedPrefs.getString(
                 KEY_INSTALLED_DATABASE_VERSION, /* default */ dottedVersion(existingBundledVersion)
             ) ?: dottedVersion(existingBundledVersion)
@@ -1064,7 +1063,7 @@ class KlingonContentDatabase(context: Context) {
             mHelperContext.deleteDatabase(REPLACEMENT_DATABASE_NAME)
 
             // Reset to bundled database version.
-            val sharedPrefsEd = PreferenceManager.getDefaultSharedPreferences(mHelperContext).edit()
+            val sharedPrefsEd = mHelperContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE).edit()
             sharedPrefsEd.remove(KEY_INSTALLED_DATABASE_VERSION)
             sharedPrefsEd.remove(KEY_ID_OF_FIRST_EXTRA_ENTRY)
             sharedPrefsEd.remove(KEY_UPDATED_DATABASE_VERSION)
@@ -1088,7 +1087,7 @@ class KlingonContentDatabase(context: Context) {
 
         private fun setShowHelpFlag() {
             // Set the flag to show the help screen (but not necessarily the tutorial).
-            val sharedPrefsEd = PreferenceManager.getDefaultSharedPreferences(mHelperContext).edit()
+            val sharedPrefsEd = mHelperContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE).edit()
             sharedPrefsEd.putBoolean(KlingonAssistant.KEY_SHOW_HELP, true)
             sharedPrefsEd.apply()
             // Log.d(TAG, "Flag set to show help.")
@@ -1120,7 +1119,7 @@ class KlingonContentDatabase(context: Context) {
             }
 
             // Update the database if that's available.
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mHelperContext)
+            val sharedPrefs = mHelperContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE)
             val installedVersion = sharedPrefs.getString(
                 KEY_INSTALLED_DATABASE_VERSION, /* default */ getBundledDatabaseVersion()
             ) ?: getBundledDatabaseVersion()
@@ -1135,7 +1134,7 @@ class KlingonContentDatabase(context: Context) {
                 val firstExtraEntryId = sharedPrefs.getInt(
                     KEY_UPDATED_ID_OF_FIRST_EXTRA_ENTRY, /* default */ ID_OF_FIRST_EXTRA_ENTRY
                 )
-                val sharedPrefsEd = PreferenceManager.getDefaultSharedPreferences(mHelperContext).edit()
+                val sharedPrefsEd = mHelperContext.getSharedPreferences("org.tlhInganHol.android.klingonassistant_preferences", Context.MODE_PRIVATE).edit()
                 sharedPrefsEd.putString(KEY_INSTALLED_DATABASE_VERSION, updatedVersion)
                 sharedPrefsEd.putInt(KEY_ID_OF_FIRST_EXTRA_ENTRY, firstExtraEntryId)
                 sharedPrefsEd.remove(KEY_UPDATED_DATABASE_VERSION)
