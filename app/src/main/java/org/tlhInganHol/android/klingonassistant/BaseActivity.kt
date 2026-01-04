@@ -195,7 +195,7 @@ open class BaseActivity : AppCompatActivity(), NavigationView.OnNavigationItemSe
             KlingonContentDatabase.KEY_INSTALLED_DATABASE_VERSION,
             /* default */ bundledVersion
         )
-        if (bundledVersion?.compareTo(installedVersion ?: "", ignoreCase = true) ?: 0 >= 0) {
+        if (bundledVersion.compareTo(installedVersion ?: "", ignoreCase = true) >= 0) {
             versionsView.text = String.format(
                 baseContext.resources.getString(R.string.app_version),
                 bundledVersion

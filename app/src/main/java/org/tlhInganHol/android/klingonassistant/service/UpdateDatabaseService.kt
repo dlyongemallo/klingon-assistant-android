@@ -73,7 +73,6 @@ class UpdateDatabaseService : JobService() {
     private inner class UpdateDatabaseTask : AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
-            val resources = this@UpdateDatabaseService.resources
             val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this@UpdateDatabaseService)
 
             // Set to false if job runs successfully to completion.

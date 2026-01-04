@@ -26,7 +26,6 @@ class PrefixChartActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
 
         setDrawerContentView(R.layout.prefix_chart)
 

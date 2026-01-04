@@ -379,9 +379,6 @@ class KlingonContentDatabase(context: Context) {
         resultsCursor: MatrixCursor,
         resultsSet: HashSet<Int>
     ) {
-        // Create a list of complex words.
-        val complexWordsList = ArrayList<KlingonContentProvider.ComplexWord>()
-
         // Keep track of current state. The verb suffix level is required for analysing rovers.
         var currentComplexWord: KlingonContentProvider.ComplexWord? = null
         var currentPrefixEntry: KlingonContentProvider.Entry? = null
@@ -772,25 +769,25 @@ class KlingonContentDatabase(context: Context) {
 
             // First, add the root as a word. (The annotation is already included.)
             if (numberRoot != "" && (!stemAdded || numberRoot != complexWord.stem())) {
-                var filterEntry = KlingonContentProvider.Entry("$numberRoot:$numberRootAnnotation", mContext)
+                var numberRootEntry = KlingonContentProvider.Entry("$numberRoot:$numberRootAnnotation", mContext)
                 if (BuildConfig.DEBUG) {
                     Log.d(TAG, "numberRoot: $numberRoot")
                 }
-                addExactMatch(numberRoot, filterEntry, resultsCursor, /* indent */ false)
+                addExactMatch(numberRoot, numberRootEntry, resultsCursor, /* indent */ false)
                 stemAdded = true
             }
 
             // Next, add the modifier as a word.
             if (numberModifier != "") {
-                val filterEntry = KlingonContentProvider.Entry("$numberModifier:n:num", mContext)
-                addExactMatch(numberModifier, filterEntry, resultsCursor, /* indent */ true)
+                val modifierEntry = KlingonContentProvider.Entry("$numberModifier:n:num", mContext)
+                addExactMatch(numberModifier, modifierEntry, resultsCursor, /* indent */ true)
             }
 
             // Finally, add the number suffix.
             if (numberSuffix != "") {
                 val suffixWithDash = "-$numberSuffix"
-                val filterEntry = KlingonContentProvider.Entry("$suffixWithDash:n:num,suff", mContext)
-                addExactMatch(suffixWithDash, filterEntry, resultsCursor, /* indent */ true)
+                val numberSuffixEntry = KlingonContentProvider.Entry("$suffixWithDash:n:num,suff", mContext)
+                addExactMatch(suffixWithDash, numberSuffixEntry, resultsCursor, /* indent */ true)
             }
         }
 
@@ -804,16 +801,16 @@ class KlingonContentDatabase(context: Context) {
                 // Check verb suffix of the current type.
                 if (verbSuffixes[j] != "") {
                     Log.d(TAG, "verb suffix = ${verbSuffixes[j]}")
-                    val filterEntry = KlingonContentProvider.Entry("${verbSuffixes[j]}:v:suff", mContext)
-                    addExactMatch(verbSuffixes[j], filterEntry, resultsCursor, /* indent */ true)
+                    val verbSuffixEntry = KlingonContentProvider.Entry("${verbSuffixes[j]}:v:suff", mContext)
+                    addExactMatch(verbSuffixes[j], verbSuffixEntry, resultsCursor, /* indent */ true)
                 }
 
                 // Check for the true rovers.
                 val rovers = complexWord.getRovers(j)
                 for (rover in rovers) {
                     Log.d(TAG, "rover = $rover")
-                    val filterEntry = KlingonContentProvider.Entry("$rover:v:suff", mContext)
-                    addExactMatch(rover, filterEntry, resultsCursor, /* indent */ true)
+                    val roverEntry = KlingonContentProvider.Entry("$rover:v:suff", mContext)
+                    addExactMatch(rover, roverEntry, resultsCursor, /* indent */ true)
                 }
             }
 
@@ -822,8 +819,8 @@ class KlingonContentDatabase(context: Context) {
             for (j in nounSuffixes.indices) {
                 if (nounSuffixes[j] != "") {
                     Log.d(TAG, "noun suffix = ${nounSuffixes[j]}")
-                    val filterEntry = KlingonContentProvider.Entry("${nounSuffixes[j]}:n:suff", mContext)
-                    addExactMatch(nounSuffixes[j], filterEntry, resultsCursor, /* indent */ true)
+                    val nounSuffixEntry = KlingonContentProvider.Entry("${nounSuffixes[j]}:n:suff", mContext)
+                    addExactMatch(nounSuffixes[j], nounSuffixEntry, resultsCursor, /* indent */ true)
                 }
             }
         }
@@ -956,13 +953,13 @@ class KlingonContentDatabase(context: Context) {
             null,
             null
         )
-        cursor?.moveToFirst()
+        cursor.moveToFirst()
         // Log.d(TAG, "cursor.count = ${cursor?.count}")
         return cursor
     }
 
     /** Returns a cursor containing a random entry. */
-    fun getRandomEntry(columns: Array<String>?): Cursor? {
+    fun getRandomEntry(@Suppress("UNUSED_PARAMETER") columns: Array<String>?): Cursor? {
         val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext)
         val onePastLastId =
             sharedPrefs.getInt(KEY_ID_OF_FIRST_EXTRA_ENTRY, /* default */ ID_OF_FIRST_EXTRA_ENTRY)

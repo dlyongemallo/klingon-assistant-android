@@ -30,9 +30,6 @@ class SourcesActivity : BaseActivity() {
         val resources = resources
         val entryTitle = findViewById<TextView>(R.id.entry_title)
 
-        // Get the shared preferences.
-        val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
-
         // Set the title.
         entryTitle.invalidate()
         if (Preferences.useKlingonUI(baseContext) && Preferences.useKlingonFont(baseContext)) {

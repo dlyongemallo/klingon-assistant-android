@@ -548,7 +548,6 @@ class EntryActivity : BaseActivity(),
     private inner class SubmitCorrectionTask : AsyncTask<String, Void, Boolean>() {
 
         override fun doInBackground(vararg correction: String): Boolean {
-            var result = true
             val entryName = correction[0]
             val partOfSpeech = correction[1]
             val definition = correction[2]

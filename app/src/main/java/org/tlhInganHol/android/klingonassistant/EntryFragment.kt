@@ -59,7 +59,6 @@ class EntryFragment : Fragment() {
         // Note: managedQuery is deprecated since API 11.
         val cursor = requireActivity().managedQuery(uri, KlingonContentDatabase.ALL_KEYS, null, null, null)
         val entry = KlingonContentProvider.Entry(cursor, requireActivity().baseContext)
-        val entryId = entry.getId()
 
         // Handle alternative spellings here.
         if (entry.isAlternativeSpelling()) {
@@ -72,7 +71,6 @@ class EntryFragment : Fragment() {
         // Set the entry's name (along with info like "slang", formatted in HTML).
         entryTitle.invalidate()
         val useKlingonFont = Preferences.useKlingonFont(requireActivity().baseContext)
-        val klingonTypeface = KlingonAssistant.getKlingonFontTypeface(requireActivity().baseContext)
         if (useKlingonFont) {
             // Preference is set to display this in {pIqaD}!
             entryTitle.text = entry.getFormattedEntryNameInKlingonFont()
@@ -429,8 +427,8 @@ class EntryFragment : Fragment() {
                 useKlingonFont -> {
                     // Display the text using the Klingon font. Categories (which have an entry of "*") must
                     // be handled specially.
-                    var replaceWithKlingonFontText = false
-                    var klingonEntryName: String? = null
+                    val replaceWithKlingonFontText: Boolean
+                    val klingonEntryName: String?
                     when {
                         linkedEntry.getEntryName() != "*" -> {
                             // This is just regular Klingon text. Display it in Klingon font.
@@ -449,6 +447,7 @@ class EntryFragment : Fragment() {
                             // This is a category, but the option to use Klingon UI is not set, so this will be in the
                             // system language.
                             // Leave it alone.
+                            klingonEntryName = null
                             replaceWithKlingonFontText = false
                         }
                     }

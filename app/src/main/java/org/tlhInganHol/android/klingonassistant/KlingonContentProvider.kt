@@ -246,7 +246,7 @@ class KlingonContentProvider : ContentProvider() {
 
             if (BuildConfig.DEBUG) {
                 val suffixType: String
-                if (complexWord!!.mIsNounCandidate) {
+                if (complexWord.mIsNounCandidate) {
                     // Noun suffix level corresponds to the suffix type.
                     suffixType = "type " + complexWord.mSuffixLevel
                 } else {
@@ -482,6 +482,7 @@ class KlingonContentProvider : ContentProvider() {
         }
 
         // Context.
+        @Suppress("RedundantLateinitModifier")
         private lateinit var mContext: Context
 
         // The raw data for the entry.
@@ -501,38 +502,38 @@ class KlingonContentProvider : ContentProvider() {
         private var mSource = ""
 
         // Localised definitions.
-        private var mDefinition_DE = ""
-        private var mNotes_DE = ""
-        private var mExamples_DE = ""
-        private var mSearchTags_DE = ""
-        private var mDefinition_FA = ""
-        private var mNotes_FA = ""
-        private var mExamples_FA = ""
-        private var mSearchTags_FA = ""
-        private var mDefinition_SV = ""
-        private var mNotes_SV = ""
-        private var mExamples_SV = ""
-        private var mSearchTags_SV = ""
-        private var mDefinition_RU = ""
-        private var mNotes_RU = ""
-        private var mExamples_RU = ""
-        private var mSearchTags_RU = ""
-        private var mDefinition_ZH_HK = ""
-        private var mNotes_ZH_HK = ""
-        private var mExamples_ZH_HK = ""
-        private var mSearchTags_ZH_HK = ""
-        private var mDefinition_PT = ""
-        private var mNotes_PT = ""
-        private var mExamples_PT = ""
-        private var mSearchTags_PT = ""
-        private var mDefinition_FI = ""
-        private var mNotes_FI = ""
-        private var mExamples_FI = ""
-        private var mSearchTags_FI = ""
-        private var mDefinition_FR = ""
-        private var mNotes_FR = ""
-        private var mExamples_FR = ""
-        private var mSearchTags_FR = ""
+        private var mDefinition_DE: String? = null
+        private var mNotes_DE: String? = null
+        private var mExamples_DE: String? = null
+        private var mSearchTags_DE: String? = null
+        private var mDefinition_FA: String? = null
+        private var mNotes_FA: String? = null
+        private var mExamples_FA: String? = null
+        private var mSearchTags_FA: String? = null
+        private var mDefinition_SV: String? = null
+        private var mNotes_SV: String? = null
+        private var mExamples_SV: String? = null
+        private var mSearchTags_SV: String? = null
+        private var mDefinition_RU: String? = null
+        private var mNotes_RU: String? = null
+        private var mExamples_RU: String? = null
+        private var mSearchTags_RU: String? = null
+        private var mDefinition_ZH_HK: String? = null
+        private var mNotes_ZH_HK: String? = null
+        private var mExamples_ZH_HK: String? = null
+        private var mSearchTags_ZH_HK: String? = null
+        private var mDefinition_PT: String? = null
+        private var mNotes_PT: String? = null
+        private var mExamples_PT: String? = null
+        private var mSearchTags_PT: String? = null
+        private var mDefinition_FI: String? = null
+        private var mNotes_FI: String? = null
+        private var mExamples_FI: String? = null
+        private var mSearchTags_FI: String? = null
+        private var mDefinition_FR: String? = null
+        private var mNotes_FR: String? = null
+        private var mExamples_FR: String? = null
+        private var mSearchTags_FR: String? = null
 
         // Part of speech metadata.
         enum class BasePartOfSpeechEnum {
@@ -1053,7 +1054,7 @@ class KlingonContentProvider : ContentProvider() {
       val slang = mContext.getResources().getString(R.string.attribute_slang)
       val name = mContext.getResources().getString(R.string.pos_name)
       var start = 0
-      var end = 0
+      var end: Int
       if (mIsArchaic) {
         end = start + archaic.length
         attr.append(archaic)
@@ -1098,14 +1099,12 @@ class KlingonContentProvider : ContentProvider() {
           attr.append(separator)
           start += separator.length
         }
-        end = start + name.length
         attr.append(name)
         attr.setSpan(
             StyleSpan(android.graphics.Typeface.ITALIC),
             start,
             start + name.length,
             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        start = end
       }
       if (!attr.toString().isEmpty()) {
         attr.append(")")
@@ -1159,7 +1158,7 @@ class KlingonContentProvider : ContentProvider() {
     // getFormattedDefinition below.
     fun getFormattedPartOfSpeech(isHtml: Boolean): String {
       // Return abbreviation for part of speech, but suppress for sentences and names.
-      var pos = ""
+      var pos: String
       if (isAlternativeSpelling()) {
         pos = mContext.getResources().getString(R.string.label_see_alt_entry) + ": "
       } else if (mBasePartOfSpeech == BasePartOfSpeechEnum.SENTENCE
@@ -1298,25 +1297,25 @@ class KlingonContentProvider : ContentProvider() {
     fun getDefinition_DE(): String {
       // If there is no German definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_DE == null) "" else mDefinition_DE
+      return mDefinition_DE ?: ""
     }
 
     fun getNotes_DE(): String {
       // If there are no German notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_DE == null) "" else mNotes_DE
+      return mNotes_DE ?: ""
     }
 
     fun getExamples_DE(): String {
       // If there are no German examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_DE == null) "" else mExamples_DE
+      return mExamples_DE ?: ""
     }
 
     fun getSearchTags_DE(): String {
       // If there are no German search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_DE == null) "" else mSearchTags_DE
+      return mSearchTags_DE ?: ""
     }
 
     // Returns true iff the other-language definition should displayed.
@@ -1380,169 +1379,169 @@ class KlingonContentProvider : ContentProvider() {
     fun getDefinition_FA(): String {
       // If there is no Persian definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_FA.isEmpty()) "" else mDefinition_FA
+      return mDefinition_FA ?: ""
     }
 
     fun getNotes_FA(): String {
       // If there are no Persian notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_FA == null) "" else mNotes_FA
+      return mNotes_FA ?: ""
     }
 
     fun getExamples_FA(): String {
       // If there are no Persian examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_FA == null) "" else mExamples_FA
+      return mExamples_FA ?: ""
     }
 
     fun getSearchTags_FA(): String {
       // If there are no Persian search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_FA == null) "" else mSearchTags_FA
+      return mSearchTags_FA ?: ""
     }
 
     fun getDefinition_SV(): String {
       // If there is no Swedish definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_SV == null) "" else mDefinition_SV
+      return mDefinition_SV ?: ""
     }
 
     fun getNotes_SV(): String {
       // If there are no Swedish notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_SV == null) "" else mNotes_SV
+      return mNotes_SV ?: ""
     }
 
     fun getExamples_SV(): String {
       // If there are no Swedish examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_SV == null) "" else mExamples_SV
+      return mExamples_SV ?: ""
     }
 
     fun getSearchTags_SV(): String {
       // If there are no Swedish search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_SV == null) "" else mSearchTags_SV
+      return mSearchTags_SV ?: ""
     }
 
     fun getDefinition_RU(): String {
       // If there is no Russian definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_RU == null) "" else mDefinition_RU
+      return mDefinition_RU ?: ""
     }
 
     fun getNotes_RU(): String {
       // If there are no Russian notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_RU == null) "" else mNotes_RU
+      return mNotes_RU ?: ""
     }
 
     fun getExamples_RU(): String {
       // If there are no Russian examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_RU == null) "" else mExamples_RU
+      return mExamples_RU ?: ""
     }
 
     fun getSearchTags_RU(): String {
       // If there are no Russian search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_RU == null) "" else mSearchTags_RU
+      return mSearchTags_RU ?: ""
     }
 
     fun getDefinition_ZH_HK(): String {
       // If there is no Chinese (Hong Kong) definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_ZH_HK == null) "" else mDefinition_ZH_HK
+      return mDefinition_ZH_HK ?: ""
     }
 
     fun getNotes_ZH_HK(): String {
       // If there are no Chinese (Hong Kong) notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_ZH_HK == null) "" else mNotes_ZH_HK
+      return mNotes_ZH_HK ?: ""
     }
 
     fun getExamples_ZH_HK(): String {
       // If there are no Chinese (Hong Kong) examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_ZH_HK == null) "" else mExamples_ZH_HK
+      return mExamples_ZH_HK ?: ""
     }
 
     fun getSearchTags_ZH_HK(): String {
       // If there are no Chinese (Hong Kong) search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_ZH_HK == null) "" else mSearchTags_ZH_HK
+      return mSearchTags_ZH_HK ?: ""
     }
 
     fun getDefinition_PT(): String {
       // If there is no Portuguese definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_PT == null) "" else mDefinition_PT
+      return mDefinition_PT ?: ""
     }
 
     fun getNotes_PT(): String {
       // If there are no Portuguese notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_PT == null) "" else mNotes_PT
+      return mNotes_PT ?: ""
     }
 
     fun getExamples_PT(): String {
       // If there are no Portuguese examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_PT == null) "" else mExamples_PT
+      return mExamples_PT ?: ""
     }
 
     fun getSearchTags_PT(): String {
       // If there are no Portuguese search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_PT == null) "" else mSearchTags_PT
+      return mSearchTags_PT ?: ""
     }
 
     fun getDefinition_FI(): String {
       // If there is no Finnish definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_FI == null) "" else mDefinition_FI
+      return mDefinition_FI ?: ""
     }
 
     fun getNotes_FI(): String {
       // If there are no Finnish notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_FI == null) "" else mNotes_FI
+      return mNotes_FI ?: ""
     }
 
     fun getExamples_FI(): String {
       // If there are no Finnish examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_FI == null) "" else mExamples_FI
+      return mExamples_FI ?: ""
     }
 
     fun getSearchTags_FI(): String {
       // If there are no Finnish search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_FI == null) "" else mSearchTags_FI
+      return mSearchTags_FI ?: ""
     }
 
     fun getDefinition_FR(): String {
       // If there is no French definition, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mDefinition_FR == null) "" else mDefinition_FR
+      return mDefinition_FR ?: ""
     }
 
     fun getNotes_FR(): String {
       // If there are no French notes, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mNotes_FR == null) "" else mNotes_FR
+      return mNotes_FR ?: ""
     }
 
     fun getExamples_FR(): String {
       // If there are no French examples, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mExamples_FR == null) "" else mExamples_FR
+      return mExamples_FR ?: ""
     }
 
     fun getSearchTags_FR(): String {
       // If there are no French search tags, the cursor could've returned
       // null, so that needs to be handled.
-      return if (mSearchTags_FR == null) "" else mSearchTags_FR
+      return mSearchTags_FR ?: ""
     }
 
     fun getSynonyms(): String {

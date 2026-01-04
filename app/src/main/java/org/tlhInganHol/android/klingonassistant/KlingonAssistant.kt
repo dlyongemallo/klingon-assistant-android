@@ -247,7 +247,6 @@ class KlingonAssistant : BaseActivity() {
                 if (entry.isVerb()) "&nbsp;&nbsp;&nbsp;&nbsp;" else "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
             } else ""
 
-            val sharedPrefs = PreferenceManager.getDefaultSharedPreferences(baseContext)
             if (Preferences.useKlingonFont(baseContext)) {
                 // Preference is set to display this in {pIqaD}!
                 view.text1.text = SpannableStringBuilder(Html.fromHtml(indent1))
