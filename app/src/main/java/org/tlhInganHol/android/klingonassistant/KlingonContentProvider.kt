@@ -481,7 +481,7 @@ class KlingonContentProvider : ContentProvider() {
         }
 
         // Context.
-        @Suppress("RedundantLateinitModifier")
+        @Suppress("RedundantLateinitModifier", "UnnecessaryLateinit")
         private lateinit var mContext: Context
 
         // The raw data for the entry.
@@ -1328,8 +1328,7 @@ class KlingonContentProvider : ContentProvider() {
         // Show other-language definitions preference set to a language and that other-language
         // definition is not empty or identical to the English.
         val otherLanguageDefinition = getOtherLanguageDefinition()
-        return otherLanguageDefinition != null
-            && otherLanguageDefinition != ""
+        return otherLanguageDefinition != ""
             && otherLanguageDefinition != mDefinition
       } else {
         return false
@@ -1350,8 +1349,7 @@ class KlingonContentProvider : ContentProvider() {
         // Show other-language definitions preference set to a language and that other-language
         // notes are not empty or identical to the English.
         val otherLanguageNotes = getOtherLanguageNotes()
-        return otherLanguageNotes != null
-            && otherLanguageNotes != ""
+        return otherLanguageNotes != ""
             && otherLanguageNotes != mNotes
       } else {
         return false
@@ -1369,7 +1367,7 @@ class KlingonContentProvider : ContentProvider() {
         // Show other-language definitions preference set to a language and that other-language
         // examples are not empty.
         val otherLanguageExamples = getOtherLanguageExamples()
-        return otherLanguageExamples != null && otherLanguageExamples != ""
+        return otherLanguageExamples != ""
       } else {
         return false
       }
@@ -1738,7 +1736,7 @@ class KlingonContentProvider : ContentProvider() {
         if (m.find()) {
           // There is a second identical copy of the book at ID "WFnPOKSp6uEC".
           var URL = "https://play.google.com/books/reader?id=dqOwxsg6XnwC"
-          URL += "&pg=GBS.PA" + Integer.parseInt(m.group(1))
+          URL += "&pg=GBS.PA" + Integer.parseInt(m.group(1)!!)
           return URL
         }
 
@@ -1850,7 +1848,7 @@ class KlingonContentProvider : ContentProvider() {
             // from the physical edition of the book, so adjust for that. There is allegedly another
             // parameter "PA" which allows linking to the printed page number. But apparently this
             // doesn't work for this book.
-            val pageNumber = Integer.parseInt(m.group(1)) + 9
+            val pageNumber = Integer.parseInt(m.group(1)!!) + 9
             // The "PA" parameter appears not to work on this book.
             URL += "&pg=GBS.PT" + pageNumber
           }
